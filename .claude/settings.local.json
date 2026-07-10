@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node verify-auth.tmp.js)",
+      "Bash(rm -f verify-auth.tmp.js)",
+      "Bash(npm install *)"
+    ]
+  }
+}
