@@ -2,12 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, X, LogOut } from 'lucide-react';
+import { Home, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { SIDEBAR_NAV } from '@/constants/navigation';
-import { useAuth } from '@/features/auth';
+import { usePermissions } from '@/hooks/use-permissions';
 
 /** Brand header shown at the top of the sidebar. */
 function SidebarBrand() {
@@ -27,12 +27,15 @@ function SidebarBrand() {
 /** The navigation list — shared by desktop and mobile renderings. */
 function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
-  const { logout } = useAuth();
+  const { canAccessModule } = usePermissions();
+
+  // Hide any module the current user cannot access (no permission for it).
+  const items = SIDEBAR_NAV.filter((item) => canAccessModule(item.module));
 
   return (
-    <div className="flex flex-1 flex-col justify-between overflow-y-auto p-3">
+    <div className="flex flex-1 flex-col overflow-y-auto p-3">
       <nav className="space-y-1">
-        {SIDEBAR_NAV.map((item) => {
+        {items.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
 
@@ -74,15 +77,6 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
           );
         })}
       </nav>
-
-      <Button
-        variant="ghost"
-        className="mt-4 w-full justify-start text-muted-foreground hover:text-foreground"
-        onClick={() => logout()}
-      >
-        <LogOut className="h-4 w-4" />
-        Logout
-      </Button>
     </div>
   );
 }

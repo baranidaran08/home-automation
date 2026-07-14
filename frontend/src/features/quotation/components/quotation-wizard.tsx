@@ -72,6 +72,7 @@ export function QuotationWizard() {
         serviceCharges: wizard.serviceChargesForApi,
       });
       setResult(quotation);
+      wizard.reset(); // draft persisted only until the quotation is generated
     } catch {
       // Error is surfaced via toast in the mutation's onError handler.
     }

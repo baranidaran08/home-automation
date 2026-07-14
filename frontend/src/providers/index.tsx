@@ -15,7 +15,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
       <QueryProvider>
         <AuthProvider>{children}</AuthProvider>
-        <Toaster richColors closeButton position="top-right" />
+        <Toaster richColors closeButton position="bottom-right" />
       </QueryProvider>
     </ThemeProvider>
   );

@@ -3,6 +3,8 @@
 import { Plus, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PermissionGate } from '@/components/shared/permission-gate';
+import { MODULES, ACTIONS } from '@/constants/permissions';
 
 interface CategoryToolbarProps {
   search: string;
@@ -25,10 +27,12 @@ export function CategoryToolbar({ search, onSearchChange, onAdd }: CategoryToolb
         />
       </div>
 
-      <Button onClick={onAdd} className="sm:w-auto">
-        <Plus className="h-4 w-4" />
-        Add Category
-      </Button>
+      <PermissionGate module={MODULES.CATEGORIES} action={ACTIONS.CREATE}>
+        <Button onClick={onAdd} className="sm:w-auto">
+          <Plus className="h-4 w-4" />
+          Add Category
+        </Button>
+      </PermissionGate>
     </div>
   );
 }

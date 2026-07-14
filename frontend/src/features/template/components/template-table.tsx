@@ -11,6 +11,8 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PermissionGate } from '@/components/shared/permission-gate';
+import { MODULES, ACTIONS } from '@/constants/permissions';
 import { templateService } from '@/services/template.service';
 import { formatDate } from '@/utils/format';
 import type { Template } from '@/types/template';
@@ -105,23 +107,27 @@ export function TemplateTable({
                         <Download className="h-4 w-4" />
                       </a>
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onEdit(template)}
-                      aria-label={`Edit ${template.templateName}`}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onDelete(template)}
-                      aria-label={`Delete ${template.templateName}`}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <PermissionGate module={MODULES.TEMPLATES} action={ACTIONS.UPDATE}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onEdit(template)}
+                        aria-label={`Edit ${template.templateName}`}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </PermissionGate>
+                    <PermissionGate module={MODULES.TEMPLATES} action={ACTIONS.DELETE}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onDelete(template)}
+                        aria-label={`Delete ${template.templateName}`}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </PermissionGate>
                   </div>
                 </TableCell>
               </TableRow>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useDebounce } from '@/hooks/use-debounce';
+import { useTableUrlState } from '@/hooks/use-table-url-state';
 import { TemplateToolbar, ALL } from './template-toolbar';
 import { TemplateTable } from './template-table';
 import { TemplateFormDialog } from './template-form-dialog';
@@ -14,15 +14,18 @@ import type { Template } from '@/types/template';
 
 const PAGE_SIZE = 10;
 
+// The category filter is synced to the URL; ALL means "no filter" (omitted).
+const TEMPLATE_FILTERS = [{ key: 'category', defaultValue: ALL }];
+
 /**
  * Template Management screen: orchestrates search/filter/pagination state and
- * the upload/edit/view/delete dialogs. Fetching and mutations live in hooks.
+ * the upload/edit/view/delete dialogs. Page, search and category all live in
+ * the URL (via useTableUrlState). Fetching and mutations live in hooks.
  */
 export function TemplateManagement() {
-  const [searchInput, setSearchInput] = useState('');
-  const debouncedSearch = useDebounce(searchInput, 400);
-  const [category, setCategory] = useState<string>(ALL);
-  const [page, setPage] = useState(1);
+  const { page, search, searchInput, setSearchInput, filters, setPage, setFilter } =
+    useTableUrlState({ filters: TEMPLATE_FILTERS });
+  const category = filters.category ?? ALL;
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Template | null>(null);
@@ -31,14 +34,10 @@ export function TemplateManagement() {
   const [deleteTarget, setDeleteTarget] = useState<Template | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch, category]);
-
   const { data, isLoading, isFetching } = useTemplates({
     page,
     limit: PAGE_SIZE,
-    search: debouncedSearch || undefined,
+    search: search || undefined,
     category: category === ALL ? undefined : category,
   });
 
@@ -46,8 +45,8 @@ export function TemplateManagement() {
   const meta = data?.meta ?? { page, limit: PAGE_SIZE, total: 0, totalPages: 0 };
 
   useEffect(() => {
-    if (meta.totalPages > 0 && page > meta.totalPages) setPage(meta.totalPages);
-  }, [meta.totalPages, page]);
+    if (meta.totalPages > 0 && page > meta.totalPages) setPage(meta.totalPages, { replace: true });
+  }, [meta.totalPages, page, setPage]);
 
   const { remove } = useTemplateMutations();
 
@@ -91,7 +90,7 @@ export function TemplateManagement() {
         search={searchInput}
         onSearchChange={setSearchInput}
         category={category}
-        onCategoryChange={setCategory}
+        onCategoryChange={(v) => setFilter('category', v)}
         onAdd={handleAdd}
       />
 

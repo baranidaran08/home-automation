@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useDebounce } from '@/hooks/use-debounce';
+import { useTableUrlState } from '@/hooks/use-table-url-state';
 import { CategoryToolbar } from './category-toolbar';
 import { CategoryTable } from './category-table';
 import { CategoryFormDialog } from './category-form-dialog';
@@ -15,14 +15,15 @@ import type { Category } from '@/types/category';
 const PAGE_SIZE = 10;
 
 /**
- * Category Management screen: orchestrates search/filter/pagination state and
- * the add/edit/view/delete dialogs. Data fetching and mutations live in hooks;
- * this component wires UI to them.
+ * Category Management screen: orchestrates search/pagination state and the
+ * add/edit/view/delete dialogs. Pagination + search live in the URL (via
+ * useTableUrlState), so refresh, deep links, and Back/Forward all work. Data
+ * fetching and mutations live in hooks; this component wires UI to them.
  */
 export function CategoryManagement() {
-  const [searchInput, setSearchInput] = useState('');
-  const debouncedSearch = useDebounce(searchInput, 400);
-  const [page, setPage] = useState(1);
+  // URL is the single source of truth for page + search (page reset on search
+  // is handled inside the hook).
+  const { page, search, searchInput, setSearchInput, setPage } = useTableUrlState();
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Category | null>(null);
@@ -31,26 +32,22 @@ export function CategoryManagement() {
   const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  // Reset to the first page whenever the query changes.
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch]);
-
   const { data, isLoading, isFetching } = useCategories({
     page,
     limit: PAGE_SIZE,
-    search: debouncedSearch || undefined,
+    search: search || undefined,
   });
 
   const categories = data?.data ?? [];
   const meta = data?.meta ?? { page, limit: PAGE_SIZE, total: 0, totalPages: 0 };
 
-  // If the current page becomes empty after a delete, step back a page.
+  // If the current page becomes empty after a delete, step back a page
+  // (replace so it doesn't add a Back/Forward entry).
   useEffect(() => {
     if (meta.totalPages > 0 && page > meta.totalPages) {
-      setPage(meta.totalPages);
+      setPage(meta.totalPages, { replace: true });
     }
-  }, [meta.totalPages, page]);
+  }, [meta.totalPages, page, setPage]);
 
   const { remove } = useCategoryMutations();
 

@@ -4,6 +4,7 @@ const { promisify } = require('util');
 const PizZip = require('pizzip');
 const Docxtemplater = require('docxtemplater');
 const libre = require('libreoffice-convert');
+const { PDFDocument } = require('pdf-lib');
 const ApiError = require('../utils/ApiError');
 const logger = require('../utils/logger');
 const { MESSAGES } = require('../constants');
@@ -191,43 +192,6 @@ const fillCategoryDocx = (templateBuffer, mergeData, items) => {
   return buf;
 };
 
-// ---- Merge multiple docx into one ------------------------------------------
-
-const bodyInner = (xml) => {
-  const open = xml.indexOf('<w:body');
-  const start = xml.indexOf('>', open) + 1;
-  let end = xml.lastIndexOf('<w:sectPr');
-  if (end === -1) end = xml.lastIndexOf('</w:body>');
-  return xml.substring(start, end);
-};
-
-const PAGE_BREAK = '<w:p><w:r><w:br w:type="page"/></w:r></w:p>';
-
-/**
- * Merge multiple generated .docx buffers into one, separated by page breaks.
- * The first document's styles/section settings are kept as the base. Suitable
- * for text + generated tables (the quotation templates); images in secondary
- * docs are not remapped.
- */
-const mergeDocx = (buffers) => {
-  if (buffers.length === 1) return buffers[0];
-
-  const baseZip = new PizZip(buffers[0]);
-  let baseXml = baseZip.file('word/document.xml').asText();
-
-  let insertAt = baseXml.lastIndexOf('<w:sectPr');
-  if (insertAt === -1) insertAt = baseXml.lastIndexOf('</w:body>');
-
-  const extra = buffers
-    .slice(1)
-    .map((b) => PAGE_BREAK + bodyInner(new PizZip(b).file('word/document.xml').asText()))
-    .join('');
-
-  baseXml = baseXml.slice(0, insertAt) + extra + baseXml.slice(insertAt);
-  baseZip.file('word/document.xml', baseXml);
-  return baseZip.generate({ type: 'nodebuffer', compression: 'DEFLATE' });
-};
-
 // ---- DOCX -> PDF (LibreOffice) ---------------------------------------------
 
 const convertToPdf = async (docxBuffer) => {
@@ -240,12 +204,35 @@ const convertToPdf = async (docxBuffer) => {
   }
 };
 
+// ---- Merge PDFs (pdf-lib) ---------------------------------------------------
+
+/**
+ * Concatenate multiple PDF buffers into one, preserving page order. Because each
+ * source PDF was rendered from its own complete .docx (its own styles, theme,
+ * numbering, fonts, images, headers/footers), all Word formatting is preserved
+ * — unlike DOCX body-only merging, which dropped non-base templates' styles.
+ */
+const mergePdfs = async (pdfBuffers) => {
+  if (pdfBuffers.length === 1) return pdfBuffers[0];
+
+  const merged = await PDFDocument.create();
+  for (const buf of pdfBuffers) {
+    // eslint-disable-next-line no-await-in-loop
+    const src = await PDFDocument.load(buf);
+    // eslint-disable-next-line no-await-in-loop
+    const pages = await merged.copyPages(src, src.getPageIndices());
+    pages.forEach((page) => merged.addPage(page));
+  }
+  const bytes = await merged.save();
+  return Buffer.from(bytes);
+};
+
 module.exports = {
   money,
   fetchBuffer,
   fillCategoryDocx,
-  mergeDocx,
   convertToPdf,
+  mergePdfs,
   buildSummaryDocx,
   TABLE_MARKER,
   buildProductTableXml,

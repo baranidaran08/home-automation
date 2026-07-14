@@ -37,13 +37,19 @@ export function CategoryProductsPanel({ categoryId, categoryName, wizard }: Cate
   };
 
   // Local text state so the per-category service charge field can be cleared.
+  // Initialise from the store (an explicit 0 shows "0", not blank).
   const [scText, setScText] = useState(
-    wizard.serviceCharges[categoryId] ? String(wizard.serviceCharges[categoryId]) : ''
+    wizard.serviceCharges[categoryId] !== undefined
+      ? String(wizard.serviceCharges[categoryId])
+      : ''
   );
   const onServiceChargeChange = (raw: string) => {
     setScText(raw);
-    wizard.setServiceCharge(categoryId, raw === '' ? 0 : Math.max(0, parseFloat(raw) || 0));
+    // Blank removes the value (≠ 0); a typed value (incl. 0) is stored explicitly.
+    if (raw === '') wizard.clearServiceCharge(categoryId);
+    else wizard.setServiceCharge(categoryId, Math.max(0, parseFloat(raw) || 0));
   };
+  const serviceChargeMissing = wizard.serviceCharges[categoryId] === undefined;
 
   return (
     <Card>
@@ -126,21 +132,31 @@ export function CategoryProductsPanel({ categoryId, categoryName, wizard }: Cate
           })
         )}
 
-        <div className="mt-2 flex flex-col gap-2 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
-          <Label htmlFor={`sc-${categoryId}`} className="text-sm font-medium">
-            Service Charge
+        <div className="mt-2 flex flex-col gap-2 border-t pt-4 sm:flex-row sm:items-start sm:justify-between">
+          <Label htmlFor={`sc-${categoryId}`} className="text-sm font-medium sm:pt-2">
+            Service Charge <span className="text-destructive">*</span>
           </Label>
-          <Input
-            id={`sc-${categoryId}`}
-            type="number"
-            min={0}
-            step="0.01"
-            inputMode="decimal"
-            placeholder="0"
-            value={scText}
-            onChange={(e) => onServiceChargeChange(e.target.value)}
-            className="sm:w-40 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
-          />
+          <div className="sm:w-40">
+            <Input
+              id={`sc-${categoryId}`}
+              type="number"
+              min={0}
+              step="0.01"
+              inputMode="decimal"
+              placeholder="Enter amount"
+              value={scText}
+              onChange={(e) => onServiceChargeChange(e.target.value)}
+              // A focused number input steps its value on mouse-wheel scroll
+              // (by `step`, e.g. 1000 -> 999.99). Blur on wheel so the page
+              // scrolls instead and the typed value is preserved exactly.
+              onWheel={(e) => e.currentTarget.blur()}
+              aria-invalid={serviceChargeMissing}
+              className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
+            />
+            {serviceChargeMissing && (
+              <p className="mt-1 text-sm text-destructive">Please enter a service charge.</p>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useDebounce } from '@/hooks/use-debounce';
+import { useTableUrlState } from '@/hooks/use-table-url-state';
 import { ProductToolbar, ALL, type ProductFilters } from './product-toolbar';
 import { ProductTable } from './product-table';
 import { ProductFormDialog } from './product-form-dialog';
@@ -10,25 +10,32 @@ import { TablePagination } from '@/components/shared/table-pagination';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { useProducts } from '../hooks/use-products';
 import { useProductMutations } from '../hooks/use-product-mutations';
-import type { Product } from '@/types/product';
+import type { Product, ProductStatus } from '@/types/product';
 
 const PAGE_SIZE = 10;
 
-const DEFAULT_FILTERS: ProductFilters = {
-  search: '',
-  category: ALL,
-  brand: ALL,
-  status: ALL,
-};
+// Filters synced to the URL. Their "no filter" value (ALL) is omitted from the
+// query string, so ?category=... only appears when an actual filter is applied.
+const PRODUCT_FILTERS = [
+  { key: 'category', defaultValue: ALL },
+  { key: 'brand', defaultValue: ALL },
+  { key: 'status', defaultValue: ALL },
+];
 
 /**
  * Product Management screen: orchestrates search/filter/pagination state and
- * the add/edit/view/delete dialogs. Fetching and mutations live in hooks.
+ * the add/edit/view/delete dialogs. Page, search, category, brand and status
+ * all live in the URL (via useTableUrlState) — so refresh, deep links, and
+ * Back/Forward all work. Fetching and mutations live in hooks (unchanged).
  */
 export function ProductManagement() {
-  const [filters, setFilters] = useState<ProductFilters>(DEFAULT_FILTERS);
-  const debouncedSearch = useDebounce(filters.search, 400);
-  const [page, setPage] = useState(1);
+  const { page, search, searchInput, setSearchInput, filters, setPage, setFilter } =
+    useTableUrlState({ filters: PRODUCT_FILTERS });
+
+  // Committed filter values from the URL (default to ALL when absent).
+  const category = filters.category ?? ALL;
+  const brand = filters.brand ?? ALL;
+  const status = filters.status ?? ALL;
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
@@ -37,26 +44,21 @@ export function ProductManagement() {
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  // Reset to page 1 whenever the query changes.
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch, filters.category, filters.brand, filters.status]);
-
   const { data, isLoading, isFetching } = useProducts({
     page,
     limit: PAGE_SIZE,
-    search: debouncedSearch || undefined,
-    category: filters.category === ALL ? undefined : filters.category,
-    brand: filters.brand === ALL ? undefined : filters.brand,
-    status: filters.status === ALL ? undefined : filters.status,
+    search: search || undefined,
+    category: category === ALL ? undefined : category,
+    brand: brand === ALL ? undefined : brand,
+    status: status === ALL ? undefined : (status as ProductStatus),
   });
 
   const products = data?.data ?? [];
   const meta = data?.meta ?? { page, limit: PAGE_SIZE, total: 0, totalPages: 0 };
 
   useEffect(() => {
-    if (meta.totalPages > 0 && page > meta.totalPages) setPage(meta.totalPages);
-  }, [meta.totalPages, page]);
+    if (meta.totalPages > 0 && page > meta.totalPages) setPage(meta.totalPages, { replace: true });
+  }, [meta.totalPages, page, setPage]);
 
   const { remove } = useProductMutations();
 
@@ -87,7 +89,14 @@ export function ProductManagement() {
     }
   };
 
-  const patch = (part: Partial<ProductFilters>) => setFilters((f) => ({ ...f, ...part }));
+  // Shape the toolbar's controlled value from URL state. `search` uses the live
+  // input (snappy typing); the filters use the committed URL values.
+  const toolbarFilters: ProductFilters = {
+    search: searchInput,
+    category,
+    brand,
+    status: status as ProductFilters['status'],
+  };
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
@@ -99,11 +108,11 @@ export function ProductManagement() {
       </div>
 
       <ProductToolbar
-        filters={filters}
-        onSearchChange={(v) => patch({ search: v })}
-        onCategoryChange={(v) => patch({ category: v })}
-        onBrandChange={(v) => patch({ brand: v })}
-        onStatusChange={(v) => patch({ status: v })}
+        filters={toolbarFilters}
+        onSearchChange={setSearchInput}
+        onCategoryChange={(v) => setFilter('category', v)}
+        onBrandChange={(v) => setFilter('brand', v)}
+        onStatusChange={(v) => setFilter('status', v)}
         onAdd={handleAdd}
       />
 

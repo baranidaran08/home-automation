@@ -2,23 +2,35 @@
 
 const { connectDatabase, disconnectDatabase } = require('../config/database');
 const logger = require('../utils/logger');
-const { seedAdmin } = require('./admin.seeder');
+const { seedPermissions } = require('./permission.seeder');
+const { seedRoles } = require('./role.seeder');
+const { seedUser } = require('./user.seeder');
 
 /**
  * Seed runner. Connects to MongoDB, executes the requested seeders, then
  * disconnects and exits. Designed for CLI use and CI/deploy pipelines.
  *
- *   npm run seed          # run all seeders
- *   npm run seed:admin    # run only the admin seeder
- *   node src/seeders/index.js admin
+ *   npm run seed              # run all seeders (permissions -> roles -> user)
+ *   npm run seed:admin        # alias for the user/RBAC seed
+ *   node src/seeders/index.js user
+ *
+ * Note: `seedRoles` internally seeds permissions and `seedUser` internally seeds
+ * roles, so each entry is self-contained and safe to run individually.
  */
 const SEEDERS = {
-  admin: seedAdmin,
+  permissions: seedPermissions,
+  roles: seedRoles,
+  user: seedUser,
+  // Backwards-compatible alias for the previous `seed:admin` script.
+  admin: seedUser,
 };
+
+// Default run seeds the full RBAC chain via the user seeder (which cascades).
+const DEFAULT_ORDER = ['user'];
 
 const run = async () => {
   const requested = process.argv[2]; // optional seeder name
-  const names = requested ? [requested] : Object.keys(SEEDERS);
+  const names = requested ? [requested] : DEFAULT_ORDER;
 
   await connectDatabase();
 
@@ -29,6 +41,7 @@ const run = async () => {
         throw new Error(`Unknown seeder "${name}". Available: ${Object.keys(SEEDERS).join(', ')}`);
       }
       logger.info(`[seed] Running "${name}"...`);
+      // eslint-disable-next-line no-await-in-loop
       await seeder();
     }
     logger.info('[seed] Done.');

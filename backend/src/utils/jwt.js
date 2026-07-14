@@ -4,10 +4,13 @@ const jwt = require('jsonwebtoken');
 const env = require('../config/env');
 
 /**
- * Sign a short JSON payload into a JWT access token. Keep the payload minimal
- * (subject + role) — never embed sensitive data such as password hashes.
+ * Sign a short JSON payload into a JWT access token. Carries the user id, role
+ * and permission keys for the RBAC system — never embed sensitive data such as
+ * password hashes. Note: the auth middleware re-resolves permissions from the
+ * DB on each request, so these claims are a convenience, not the source of truth.
  *
- * @param {{ sub: string, role: string, email?: string }} payload
+ * @param {{ sub: string, role?: string, roleId?: string, email?: string,
+ *           isSuperAdmin?: boolean, permissions?: string[] }} payload
  */
 const signAccessToken = (payload) =>
   jwt.sign(payload, env.jwt.secret, { expiresIn: env.jwt.expiresIn });

@@ -1,5 +1,12 @@
 import { httpService } from './http.service';
-import type { Admin, AuthPayload, LoginCredentials } from '@/types/auth';
+import type {
+  AuthUser,
+  AuthPayload,
+  LoginCredentials,
+  ChangePasswordInput,
+  ForgotPasswordInput,
+  ResetPasswordInput,
+} from '@/types/auth';
 
 /**
  * Auth API calls. The JWT is handled entirely via an httpOnly cookie set by
@@ -12,7 +19,16 @@ export const authService = {
 
   logout: () => httpService.post<null>('/auth/logout'),
 
-  getCurrentAdmin: () => httpService.get<AuthPayload>('/auth/me'),
+  getCurrentUser: () => httpService.get<AuthPayload>('/auth/me'),
+
+  changePassword: (input: ChangePasswordInput) =>
+    httpService.post<AuthPayload, ChangePasswordInput>('/auth/change-password', input),
+
+  forgotPassword: (input: ForgotPasswordInput) =>
+    httpService.post<null, ForgotPasswordInput>('/auth/forgot-password', input),
+
+  resetPassword: (input: ResetPasswordInput) =>
+    httpService.post<null, ResetPasswordInput>('/auth/reset-password', input),
 };
 
-export type { Admin, LoginCredentials };
+export type { AuthUser, LoginCredentials };

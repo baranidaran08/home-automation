@@ -24,7 +24,7 @@ interface DashboardTopbarProps {
  * admin identity and a logout button on the right.
  */
 export function DashboardTopbar({ onMenuClick }: DashboardTopbarProps) {
-  const { admin, logout } = useAuth();
+  const { user, logout } = useAuth();
 
   return (
     <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-4 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 sm:px-6">
@@ -46,9 +46,14 @@ export function DashboardTopbar({ onMenuClick }: DashboardTopbarProps) {
       <div className="flex items-center gap-2 sm:gap-3">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-            {initials(admin?.name)}
+            {initials(user?.name)}
           </div>
-          <span className="hidden text-sm font-medium sm:inline">{admin?.name}</span>
+          <div className="hidden leading-tight sm:block">
+            <span className="block text-sm font-medium">{user?.name}</span>
+            {user?.role?.name && (
+              <span className="block text-xs text-muted-foreground">{user.role.name}</span>
+            )}
+          </div>
         </div>
         <Button variant="outline" size="sm" onClick={() => logout()}>
           <LogOut className="h-4 w-4" />

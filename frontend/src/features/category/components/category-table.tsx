@@ -11,6 +11,8 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PermissionGate } from '@/components/shared/permission-gate';
+import { MODULES, ACTIONS } from '@/constants/permissions';
 import { formatDate, truncate } from '@/utils/format';
 import type { Category } from '@/types/category';
 
@@ -87,23 +89,27 @@ export function CategoryTable({
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onEdit(category)}
-                      aria-label={`Edit ${category.categoryName}`}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onDelete(category)}
-                      aria-label={`Delete ${category.categoryName}`}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <PermissionGate module={MODULES.CATEGORIES} action={ACTIONS.UPDATE}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onEdit(category)}
+                        aria-label={`Edit ${category.categoryName}`}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </PermissionGate>
+                    <PermissionGate module={MODULES.CATEGORIES} action={ACTIONS.DELETE}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onDelete(category)}
+                        aria-label={`Delete ${category.categoryName}`}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </PermissionGate>
                   </div>
                 </TableCell>
               </TableRow>

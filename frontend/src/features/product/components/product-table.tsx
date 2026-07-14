@@ -12,6 +12,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StatusBadge } from '@/components/shared/status-badge';
+import { PermissionGate } from '@/components/shared/permission-gate';
+import { MODULES, ACTIONS } from '@/constants/permissions';
 import { formatCurrency } from '@/utils/format';
 import { cn } from '@/lib/utils';
 import type { Product } from '@/types/product';
@@ -115,23 +117,27 @@ export function ProductTable({ products, isLoading, onView, onEdit, onDelete }: 
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onEdit(product)}
-                      aria-label={`Edit ${product.productName}`}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onDelete(product)}
-                      aria-label={`Delete ${product.productName}`}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <PermissionGate module={MODULES.PRODUCTS} action={ACTIONS.UPDATE}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onEdit(product)}
+                        aria-label={`Edit ${product.productName}`}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </PermissionGate>
+                    <PermissionGate module={MODULES.PRODUCTS} action={ACTIONS.DELETE}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onDelete(product)}
+                        aria-label={`Delete ${product.productName}`}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </PermissionGate>
                   </div>
                 </TableCell>
               </TableRow>

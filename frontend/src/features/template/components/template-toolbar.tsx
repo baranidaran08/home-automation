@@ -11,6 +11,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useCategoryOptions } from '@/features/product';
+import { PermissionGate } from '@/components/shared/permission-gate';
+import { MODULES, ACTIONS } from '@/constants/permissions';
 
 export const ALL = 'all';
 
@@ -61,10 +63,12 @@ export function TemplateToolbar({
         </Select>
       </div>
 
-      <Button onClick={onAdd}>
-        <Plus className="h-4 w-4" />
-        Upload Template
-      </Button>
+      <PermissionGate module={MODULES.TEMPLATES} action={ACTIONS.CREATE}>
+        <Button onClick={onAdd}>
+          <Plus className="h-4 w-4" />
+          Upload Template
+        </Button>
+      </PermissionGate>
     </div>
   );
 }

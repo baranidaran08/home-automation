@@ -13,10 +13,56 @@ const MESSAGES = {
   LOGIN_SUCCESS: 'Logged in successfully',
   LOGOUT_SUCCESS: 'Logged out successfully',
   INVALID_CREDENTIALS: 'Invalid email or password',
-  CURRENT_ADMIN_FETCHED: 'Current admin fetched successfully',
+  CURRENT_USER_FETCHED: 'Current user fetched successfully',
   TOKEN_MISSING: 'Authentication token is missing',
   TOKEN_INVALID: 'Invalid or expired authentication token',
-  ADMIN_NOT_FOUND: 'Admin account no longer exists',
+  USER_NOT_FOUND: 'User account no longer exists',
+
+  // First-login / change-password flow
+  PASSWORD_CHANGE_REQUIRED: 'You must change your temporary password before continuing',
+  PASSWORD_CHANGED: 'Password changed successfully',
+  CURRENT_PASSWORD_INVALID: 'The current password is incorrect',
+  PASSWORD_SAME: 'New password must be different from the current password',
+
+  // Forgot / reset password flow. The request message is intentionally generic so
+  // it never reveals whether an email is registered (enumeration protection).
+  PASSWORD_RESET_REQUESTED: 'If an account exists, a reset link has been sent.',
+  PASSWORD_RESET_SUCCESS: 'Your password has been reset successfully. Please log in.',
+  PASSWORD_RESET_TOKEN_INVALID:
+    'This reset link is invalid or has expired. Please request a new one.',
+
+  // User (RBAC-managed accounts)
+  USER_CREATED: 'User created successfully',
+  USER_UPDATED: 'User updated successfully',
+  USER_DELETED: 'User deleted successfully',
+  USER_FETCHED: 'User fetched successfully',
+  USERS_FETCHED: 'Users fetched successfully',
+  USER_DUPLICATE: 'A user with this email already exists',
+  USER_ROLE_REQUIRED: 'A valid role is required',
+  USER_SELF_DELETE: 'You cannot delete your own account',
+  USER_LAST_SUPER_ADMIN: 'Cannot remove the last Super Admin',
+  // Root Super Admin — the protected seeded owner account.
+  ROOT_DELETE_BLOCKED: 'The Root Super Admin account is protected and cannot be deleted',
+  ROOT_ROLE_LOCKED: "The Root Super Admin's role cannot be changed",
+  ROOT_EDIT_BLOCKED: 'The Root Super Admin can only be edited by the account owner',
+  ROOT_DISABLE_BLOCKED: 'The Root Super Admin account cannot be disabled',
+
+  // Role
+  ROLE_CREATED: 'Role created successfully',
+  ROLE_UPDATED: 'Role updated successfully',
+  ROLE_DELETED: 'Role deleted successfully',
+  ROLE_FETCHED: 'Role fetched successfully',
+  ROLES_FETCHED: 'Roles fetched successfully',
+  ROLE_NOT_FOUND: 'Role not found',
+  ROLE_DUPLICATE: 'A role with this name already exists',
+  ROLE_SYSTEM_LOCKED: 'System roles cannot be modified or deleted',
+  ROLE_IN_USE: 'This role is assigned to one or more users and cannot be deleted',
+  ROLE_INVALID_PERMISSIONS: 'One or more permissions are invalid',
+  ROLE_MISSING_DEPENDENCIES:
+    'Invalid permission combination — the following required permissions are missing',
+
+  // Permission
+  PERMISSIONS_FETCHED: 'Permissions fetched successfully',
 
   // Dashboard
   DASHBOARD_SUMMARY_FETCHED: 'Dashboard summary fetched successfully',

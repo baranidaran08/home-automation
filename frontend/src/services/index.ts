@@ -6,3 +6,6 @@ export { categoryService } from './category.service';
 export { productService } from './product.service';
 export { templateService } from './template.service';
 export { quotationService } from './quotation.service';
+export { roleService } from './role.service';
+export { userService } from './user.service';
+export { permissionService } from './permission.service';

@@ -82,9 +82,6 @@ export function ViewProductDialog({ open, onOpenChange, product }: ViewProductDi
             <div className="flex flex-wrap gap-x-6 gap-y-1 border-t pt-3 text-xs text-muted-foreground">
               <span>Created {formatDate(product.createdAt)}</span>
               <span>Updated {formatDate(product.updatedAt)}</span>
-              <span>
-                Slug: <code className="rounded bg-muted px-1">{product.slug}</code>
-              </span>
             </div>
           </div>
         )}

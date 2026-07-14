@@ -14,14 +14,19 @@ import { FullPageLoader } from '@/components/shared/full-page-loader';
 export function AuthGuard({ children }: { children: ReactNode }) {
   const router = useRouter();
   const status = useAuthStore((s) => s.status);
+  const mustChangePassword = useAuthStore((s) => s.user?.mustChangePassword ?? false);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.replace(ROUTES.auth.login);
+    } else if (status === 'authenticated' && mustChangePassword) {
+      // First-login lock: no dashboard access until the temporary password is
+      // replaced. The backend enforces this too (authorize returns 403).
+      router.replace(ROUTES.changePassword);
     }
-  }, [status, router]);
+  }, [status, mustChangePassword, router]);
 
-  if (status !== 'authenticated') {
+  if (status !== 'authenticated' || mustChangePassword) {
     return <FullPageLoader />;
   }
 

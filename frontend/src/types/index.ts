@@ -5,7 +5,20 @@ export type {
   PaginationMeta,
   PaginationParams,
 } from './api';
-export type { Admin, LoginCredentials, AuthPayload } from './auth';
+export type { AuthUser, LoginCredentials, AuthPayload } from './auth';
+export type {
+  Permission,
+  Role,
+  RoleSummary,
+  User,
+  PermissionKey,
+  CreateRoleInput,
+  UpdateRoleInput,
+  CreateUserInput,
+  UpdateUserInput,
+  RoleListParams,
+  UserListParams,
+} from './rbac';
 export type { DashboardSummary } from './dashboard';
 export type {
   Category,

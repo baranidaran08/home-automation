@@ -10,6 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { PermissionGate } from '@/components/shared/permission-gate';
+import { MODULES, ACTIONS } from '@/constants/permissions';
 import { useCategoryOptions } from '../hooks/use-category-options';
 import { useBrands } from '../hooks/use-brands';
 import type { ProductStatus } from '@/types/product';
@@ -98,10 +100,12 @@ export function ProductToolbar({
         </Select>
       </div>
 
-      <Button onClick={onAdd}>
-        <Plus className="h-4 w-4" />
-        Add Product
-      </Button>
+      <PermissionGate module={MODULES.PRODUCTS} action={ACTIONS.CREATE}>
+        <Button onClick={onAdd}>
+          <Plus className="h-4 w-4" />
+          Add Product
+        </Button>
+      </PermissionGate>
     </div>
   );
 }

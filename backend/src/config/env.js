@@ -84,6 +84,33 @@ const env = {
   upload: {
     maxFileSizeBytes: parseInt(optional('MAX_FILE_SIZE_MB', '10'), 10) * 1024 * 1024,
   },
+
+  // Outbound email (SMTP). All optional so the app still boots without mail
+  // configured — the email service checks `isConfigured` and skips sending if
+  // credentials are missing, and a send failure never breaks the request.
+  // For Gmail, SMTP_PASS must be a 16-character App Password (not the account
+  // password) with 2-Step Verification enabled.
+  smtp: {
+    host: optional('SMTP_HOST', 'smtp.gmail.com'),
+    port: parseInt(optional('SMTP_PORT', '587'), 10),
+    user: optional('SMTP_USER', ''),
+    pass: optional('SMTP_PASS', ''),
+    // Address shown in the "From" header; defaults to the authenticated user.
+    from: optional('SMTP_FROM', ''),
+  },
+
+  // Public URLs used inside emails (e.g. the login link in the welcome email).
+  app: {
+    loginUrl: optional('APP_LOGIN_URL', 'http://localhost:3000/login'),
+    // Base URL of the frontend, used to build links inside emails (e.g. the
+    // password-reset URL: `${frontendUrl}/reset-password?token=...`).
+    frontendUrl: optional('FRONTEND_URL', 'http://localhost:3000'),
+  },
+
+  // Password-reset one-time tokens (hashed at rest; single-use).
+  resetPassword: {
+    expiresMinutes: parseInt(optional('RESET_PASSWORD_EXPIRES_MINUTES', '15'), 10),
+  },
 };
 
 module.exports = env;

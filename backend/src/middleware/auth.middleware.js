@@ -3,6 +3,7 @@
 const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
 const { verifyAccessToken } = require('../utils/jwt');
+const { rolePermissionKeys } = require('../utils/rbac');
 const authService = require('../services/auth.service');
 const env = require('../config/env');
 const { MESSAGES } = require('../constants');
@@ -23,8 +24,11 @@ const extractToken = (req) => {
 };
 
 /**
- * Guard for private routes. Verifies the token, confirms the admin still
- * exists, and attaches it as `req.admin`. Throws 401 on any failure.
+ * Guard for private routes. Verifies the token, then RE-LOADS the user with its
+ * role + permissions from the database (rather than trusting the token's cached
+ * claims) so role/permission edits take effect on the very next request without
+ * forcing a re-login. Attaches `req.user`, `req.permissionKeys` (a Set), and
+ * `req.isSuperAdmin`. Throws 401 on any failure.
  */
 const authenticate = asyncHandler(async (req, _res, next) => {
   const token = extractToken(req);
@@ -40,23 +44,38 @@ const authenticate = asyncHandler(async (req, _res, next) => {
     throw ApiError.unauthorized(MESSAGES.TOKEN_INVALID);
   }
 
-  // Ensure the account referenced by the token still exists.
-  req.admin = await authService.getAdminById(payload.sub);
+  // Ensure the account still exists and resolve its CURRENT permissions.
+  const user = await authService.getUserById(payload.sub);
+  req.user = user;
   req.token = token;
+  req.isSuperAdmin = !!user.role?.isSuperAdmin;
+  req.permissionKeys = new Set(rolePermissionKeys(user.role));
   return next();
 });
 
 /**
- * Role guard factory. Usage: `router.use(authenticate, authorize(ROLES.ADMIN))`.
- * Included for forward-compatibility; the single-admin app only uses `admin`.
+ * Permission guard factory. Usage:
+ *   router.post('/', authorize(PERMS.products.create), validate(...), ctrl.create);
+ *
+ * Allows the request when the user is a Super Admin (wildcard) or their role
+ * grants the exact permission key; otherwise responds 403 Forbidden. `authorize`
+ * and `requirePermission` are aliases.
  */
-const authorize =
-  (...allowedRoles) =>
-  (req, _res, next) => {
-    if (!req.admin || (allowedRoles.length && !allowedRoles.includes(req.admin.role))) {
-      return next(ApiError.forbidden(MESSAGES.FORBIDDEN));
-    }
+const authorize = (permissionKey) => (req, _res, next) => {
+  if (!req.user) {
+    return next(ApiError.unauthorized(MESSAGES.UNAUTHORIZED));
+  }
+  // First-login lock: a user still holding a temporary password may not touch any
+  // permission-guarded module route until they set their own password. This gates
+  // EVERY protected module (they all use `authorize`), while /auth/change-password,
+  // /auth/me and /auth/logout use only `authenticate`, so they stay reachable.
+  if (req.user.mustChangePassword) {
+    return next(ApiError.forbidden(MESSAGES.PASSWORD_CHANGE_REQUIRED));
+  }
+  if (req.isSuperAdmin || !permissionKey || req.permissionKeys?.has(permissionKey)) {
     return next();
-  };
+  }
+  return next(ApiError.forbidden(MESSAGES.FORBIDDEN));
+};
 
-module.exports = { authenticate, authorize };
+module.exports = { authenticate, authorize, requirePermission: authorize };

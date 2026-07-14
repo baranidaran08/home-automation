@@ -22,9 +22,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     let active = true;
     authService
-      .getCurrentAdmin()
-      .then(({ admin }) => {
-        if (active) setAuthenticated(admin);
+      .getCurrentUser()
+      .then(({ user }) => {
+        if (active) setAuthenticated(user);
       })
       .catch(() => {
         if (active) setUnauthenticated();

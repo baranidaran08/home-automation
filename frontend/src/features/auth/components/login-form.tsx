@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -37,9 +38,16 @@ export function LoginForm() {
   const onSubmit = async (values: LoginFormValues) => {
     setFormError(null);
     try {
-      await login(values);
-      toast.success('Welcome back!');
-      router.replace(ROUTES.dashboard.root);
+      const user = await login(values);
+      // First-login users (temporary password) must set their own password before
+      // they can reach the dashboard.
+      if (user.mustChangePassword) {
+        toast.success('Please set a new password to continue');
+        router.replace(ROUTES.changePassword);
+      } else {
+        toast.success('Welcome back!');
+        router.replace(ROUTES.dashboard.root);
+      }
     } catch (err) {
       const message = (err as NormalizedApiError)?.message ?? 'Login failed. Please try again.';
       setFormError(message);
@@ -73,7 +81,15 @@ export function LoginForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="password">Password</Label>
+          <Link
+            href={ROUTES.auth.forgotPassword}
+            className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+          >
+            Forgot password?
+          </Link>
+        </div>
         <div className="relative">
           <Input
             id="password"

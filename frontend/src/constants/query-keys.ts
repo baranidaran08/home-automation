@@ -33,4 +33,18 @@ export const queryKeys = {
     list: (params: unknown) => ['quotations', 'list', params] as const,
     detail: (id: string) => ['quotations', 'detail', id] as const,
   },
+  roles: {
+    all: ['roles'] as const,
+    list: (params: unknown) => ['roles', 'list', params] as const,
+    detail: (id: string) => ['roles', 'detail', id] as const,
+    options: ['roles', 'options'] as const,
+  },
+  users: {
+    all: ['users'] as const,
+    list: (params: unknown) => ['users', 'list', params] as const,
+    detail: (id: string) => ['users', 'detail', id] as const,
+  },
+  permissions: {
+    all: ['permissions'] as const,
+  },
 } as const;

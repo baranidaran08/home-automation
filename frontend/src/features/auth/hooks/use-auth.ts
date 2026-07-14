@@ -14,13 +14,13 @@ import type { LoginCredentials } from '@/types/auth';
  */
 export function useAuth() {
   const router = useRouter();
-  const { admin, status, isAuthenticated, setAuthenticated, setUnauthenticated } = useAuthStore();
+  const { user, status, isAuthenticated, setAuthenticated, setUnauthenticated } = useAuthStore();
 
   const login = useCallback(
     async (credentials: LoginCredentials) => {
-      const { admin: loggedInAdmin } = await authService.login(credentials);
-      setAuthenticated(loggedInAdmin);
-      return loggedInAdmin;
+      const { user: loggedInUser } = await authService.login(credentials);
+      setAuthenticated(loggedInUser);
+      return loggedInUser;
     },
     [setAuthenticated]
   );
@@ -35,5 +35,5 @@ export function useAuth() {
     }
   }, [router, setUnauthenticated]);
 
-  return { admin, status, isAuthenticated, login, logout };
+  return { user, status, isAuthenticated, login, logout };
 }

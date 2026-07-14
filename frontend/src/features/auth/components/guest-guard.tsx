@@ -13,12 +13,14 @@ import { FullPageLoader } from '@/components/shared/full-page-loader';
 export function GuestGuard({ children }: { children: ReactNode }) {
   const router = useRouter();
   const status = useAuthStore((s) => s.status);
+  const mustChangePassword = useAuthStore((s) => s.user?.mustChangePassword ?? false);
 
   useEffect(() => {
     if (status === 'authenticated') {
-      router.replace(ROUTES.dashboard.root);
+      // Send first-login users to change-password; everyone else to the dashboard.
+      router.replace(mustChangePassword ? ROUTES.changePassword : ROUTES.dashboard.root);
     }
-  }, [status, router]);
+  }, [status, mustChangePassword, router]);
 
   if (status === 'loading' || status === 'authenticated') {
     return <FullPageLoader />;

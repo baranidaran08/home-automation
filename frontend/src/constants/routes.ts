@@ -8,15 +8,21 @@ export const ROUTES = {
   // Single-admin app: login only, no registration.
   auth: {
     login: '/login',
+    forgotPassword: '/forgot-password',
+    resetPassword: '/reset-password',
   },
+
+  // First-login forced password change (temporary password → own password).
+  changePassword: '/change-password',
 
   dashboard: {
     root: '/dashboard',
-    // All admin modules are nested under /dashboard. Categories is live; the
-    // rest render a "Coming Soon" placeholder until their modules ship.
+    // All admin modules are nested under /dashboard.
     categories: '/dashboard/categories',
     products: '/dashboard/products',
     templates: '/dashboard/templates',
     quotations: '/dashboard/quotations',
+    users: '/dashboard/users',
+    roles: '/dashboard/roles',
   },
 } as const;

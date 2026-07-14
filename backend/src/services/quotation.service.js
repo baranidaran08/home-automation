@@ -207,8 +207,11 @@ const generateQuotation = async (id) => {
     quotation.quotationDate
   );
 
-  // Fill one document per category using ONLY that category's own totals.
-  const buffers = [];
+  // Fill each category's template (its own totals) and convert it to its OWN
+  // PDF. Converting per-template preserves every template's full Word formatting
+  // (table styles, theme colors, borders, fonts, images, headers/footers) —
+  // which a DOCX body-only merge would drop for non-base templates.
+  const pdfBuffers = [];
   for (const cat of quotation.categoryTotals) {
     const template = templateByCat.get(String(cat.category));
     // eslint-disable-next-line no-await-in-loop
@@ -229,24 +232,25 @@ const generateQuotation = async (id) => {
       service_charge: docService.money(cat.serviceCharge),
       service_total: docService.money(cat.serviceTotal),
     };
-    buffers.push(docService.fillCategoryDocx(templateBuffer, mergeData, catItems));
+    const filledDocx = docService.fillCategoryDocx(templateBuffer, mergeData, catItems);
+    // eslint-disable-next-line no-await-in-loop
+    pdfBuffers.push(await docService.convertToPdf(filledDocx));
   }
 
-  // Append a final summary page listing every service + the grand total.
-  buffers.push(
-    docService.buildSummaryDocx(
-      quotation.categoryTotals.map((c) => ({
-        name: c.categoryName,
-        productTotal: c.productTotal,
-        serviceCharge: c.serviceCharge,
-        serviceTotal: c.serviceTotal,
-      })),
-      quotation.grandTotal
-    )
+  // Append a final summary page listing every service + the grand total (last).
+  const summaryDocx = docService.buildSummaryDocx(
+    quotation.categoryTotals.map((c) => ({
+      name: c.categoryName,
+      productTotal: c.productTotal,
+      serviceCharge: c.serviceCharge,
+      serviceTotal: c.serviceTotal,
+    })),
+    quotation.grandTotal
   );
+  pdfBuffers.push(await docService.convertToPdf(summaryDocx));
 
-  const mergedDocx = docService.mergeDocx(buffers);
-  const pdfBuffer = await docService.convertToPdf(mergedDocx);
+  // Merge the per-template PDFs into one, preserving page order.
+  const pdfBuffer = await docService.mergePdfs(pdfBuffers);
 
   logger.info(
     `[quotation] ${quotation.quotationNumber}: generated PDF (${pdfBuffer.length} bytes)`

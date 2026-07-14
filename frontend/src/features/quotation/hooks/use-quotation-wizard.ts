@@ -1,103 +1,39 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo } from 'react';
+import {
+  useQuotationDraftStore,
+  WIZARD_STEPS,
+  type CustomerDetails,
+  type WizardProduct,
+} from '../store/quotation-draft.store';
 
-export interface WizardProduct {
-  _id: string;
-  productName: string;
-  price: number;
-  categoryId: string;
-  categoryName: string;
-}
-
-export interface CustomerDetails {
-  customerName: string;
-  phone: string;
-  email: string;
-  address: string;
-  projectName: string;
-  projectLocation: string;
-}
-
-const EMPTY_CUSTOMER: CustomerDetails = {
-  customerName: '',
-  phone: '',
-  email: '',
-  address: '',
-  projectName: '',
-  projectLocation: '',
-};
-
-interface Selection {
-  quantity: number;
-  product: WizardProduct;
-}
-
-export const WIZARD_STEPS = ['Customer', 'Categories', 'Products', 'Preview'] as const;
+// Re-export so existing imports (`from '../hooks/use-quotation-wizard'`) keep working.
+export { WIZARD_STEPS };
+export type { CustomerDetails, WizardProduct };
 
 /**
- * Local state machine for the quotation wizard: customer details, selected
- * categories, per-product quantities, and derived live totals (a client mirror
- * of the server-side calculation — the backend remains authoritative).
+ * Wizard facade over the persisted draft store: exposes the raw draft state,
+ * the actions, and derived live totals (a client mirror of the server-side
+ * calculation — the backend remains authoritative). The draft itself survives
+ * dashboard navigation because it lives in the module-level Zustand store.
  */
 export function useQuotationWizard() {
-  const [step, setStep] = useState(0);
-  const [customer, setCustomer] = useState<CustomerDetails>(EMPTY_CUSTOMER);
-  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
-  const [selections, setSelections] = useState<Record<string, Selection>>({});
-  // Per-category service charges keyed by categoryId.
-  const [serviceCharges, setServiceCharges] = useState<Record<string, number>>({});
+  const step = useQuotationDraftStore((s) => s.step);
+  const customer = useQuotationDraftStore((s) => s.customer);
+  const selectedCategoryIds = useQuotationDraftStore((s) => s.selectedCategoryIds);
+  const selections = useQuotationDraftStore((s) => s.selections);
+  const serviceCharges = useQuotationDraftStore((s) => s.serviceCharges);
 
-  const setServiceCharge = useCallback(
-    (categoryId: string, amount: number) =>
-      setServiceCharges((sc) => ({ ...sc, [categoryId]: Math.max(0, amount) || 0 })),
-    []
-  );
-
-  const setCustomerField = useCallback(
-    (field: keyof CustomerDetails, value: string) =>
-      setCustomer((c) => ({ ...c, [field]: value })),
-    []
-  );
-
-  const toggleCategory = useCallback((categoryId: string) => {
-    setSelectedCategoryIds((ids) =>
-      ids.includes(categoryId) ? ids.filter((id) => id !== categoryId) : [...ids, categoryId]
-    );
-    // Drop selections belonging to a de-selected category.
-    setSelections((sel) => {
-      const next = { ...sel };
-      for (const [pid, s] of Object.entries(sel)) {
-        if (s.product.categoryId === categoryId) delete next[pid];
-      }
-      // If the category was NOT previously selected we keep everything.
-      return Object.keys(next).length === Object.keys(sel).length ? sel : next;
-    });
-    // Drop its service charge too.
-    setServiceCharges((sc) => {
-      if (!(categoryId in sc)) return sc;
-      const next = { ...sc };
-      delete next[categoryId];
-      return next;
-    });
-  }, []);
-
-  const setQuantity = useCallback((product: WizardProduct, quantity: number) => {
-    setSelections((sel) => {
-      const next = { ...sel };
-      if (quantity <= 0) delete next[product._id];
-      else next[product._id] = { quantity, product };
-      return next;
-    });
-  }, []);
-
-  const removeSelection = useCallback((productId: string) => {
-    setSelections((sel) => {
-      const next = { ...sel };
-      delete next[productId];
-      return next;
-    });
-  }, []);
+  const next = useQuotationDraftStore((s) => s.next);
+  const back = useQuotationDraftStore((s) => s.back);
+  const reset = useQuotationDraftStore((s) => s.reset);
+  const setCustomerField = useQuotationDraftStore((s) => s.setCustomerField);
+  const toggleCategory = useQuotationDraftStore((s) => s.toggleCategory);
+  const setQuantity = useQuotationDraftStore((s) => s.setQuantity);
+  const removeSelection = useQuotationDraftStore((s) => s.removeSelection);
+  const setServiceCharge = useQuotationDraftStore((s) => s.setServiceCharge);
+  const clearServiceCharge = useQuotationDraftStore((s) => s.clearServiceCharge);
 
   const selectionList = useMemo(() => Object.values(selections), [selections]);
 
@@ -141,28 +77,36 @@ export function useQuotationWizard() {
     return map;
   }, [categoryTotals]);
 
+  // Every product-bearing category must have an EXPLICIT service charge entered
+  // (0 counts; a blank/absent value does not).
+  const serviceChargesComplete = useMemo(
+    () => categoryTotals.every((c) => typeof serviceCharges[c.categoryId] === 'number'),
+    [categoryTotals, serviceCharges]
+  );
+
   // Email is optional, but if provided it must be a valid address.
   const emailValid = useMemo(() => {
     const v = customer.email.trim();
     return v === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
   }, [customer.email]);
 
-  const canNext = useMemo(() => {
-    if (step === 0) return customer.customerName.trim().length >= 2 && emailValid;
-    if (step === 1) return selectedCategoryIds.length >= 1;
-    if (step === 2) return itemsForApi.length >= 1;
-    return true;
-  }, [step, customer.customerName, emailValid, selectedCategoryIds.length, itemsForApi.length]);
+  // Phone must be exactly 10 digits.
+  const phoneValid = useMemo(() => /^\d{10}$/.test(customer.phone), [customer.phone]);
 
-  const next = useCallback(() => setStep((s) => Math.min(s + 1, WIZARD_STEPS.length - 1)), []);
-  const back = useCallback(() => setStep((s) => Math.max(s - 1, 0)), []);
-  const reset = useCallback(() => {
-    setStep(0);
-    setCustomer(EMPTY_CUSTOMER);
-    setSelectedCategoryIds([]);
-    setSelections({});
-    setServiceCharges({});
-  }, []);
+  const canNext = useMemo(() => {
+    if (step === 0) return customer.customerName.trim().length >= 2 && emailValid && phoneValid;
+    if (step === 1) return selectedCategoryIds.length >= 1;
+    if (step === 2) return itemsForApi.length >= 1 && serviceChargesComplete;
+    return true;
+  }, [
+    step,
+    customer.customerName,
+    emailValid,
+    phoneValid,
+    selectedCategoryIds.length,
+    itemsForApi.length,
+    serviceChargesComplete,
+  ]);
 
   return {
     step,
@@ -171,12 +115,14 @@ export function useQuotationWizard() {
     selectedCategoryIds,
     toggleCategory,
     emailValid,
+    phoneValid,
     selections,
     selectionList,
     setQuantity,
     removeSelection,
     serviceCharges,
     setServiceCharge,
+    clearServiceCharge,
     categoryTotals,
     productTotal,
     grandTotal,
