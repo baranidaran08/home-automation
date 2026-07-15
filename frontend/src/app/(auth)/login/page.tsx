@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { Home } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoginForm } from '@/features/auth';
 
@@ -13,16 +12,10 @@ export const metadata: Metadata = {
  */
 export default function LoginPage() {
   return (
-    <Card className="w-full shadow-lg">
-      <CardHeader className="space-y-3 text-center">
-        {/* Company logo placeholder */}
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-          <Home className="h-7 w-7" aria-hidden />
-        </div>
-        <div className="space-y-1">
-          <CardTitle className="text-xl">Home Automation</CardTitle>
-          <CardDescription>Quotation Management System — Admin Sign in</CardDescription>
-        </div>
+    <Card className="w-full p-2">
+      <CardHeader className="space-y-1.5 text-center">
+        <CardTitle className="text-2xl">Welcome back</CardTitle>
+        <CardDescription>Sign in to your Quotation Management workspace.</CardDescription>
       </CardHeader>
       <CardContent>
         <LoginForm />

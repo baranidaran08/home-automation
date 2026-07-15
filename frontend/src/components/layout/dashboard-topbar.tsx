@@ -2,6 +2,7 @@
 
 import { Menu, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from './theme-toggle';
 import { useAuth } from '@/features/auth';
 
 /** Derive up-to-two-letter initials from a name for the avatar badge. */
@@ -20,14 +21,15 @@ interface DashboardTopbarProps {
 }
 
 /**
- * Sticky top navbar: mobile menu trigger + app name on the left; logged-in
- * admin identity and a logout button on the right.
+ * Sticky top bar: mobile menu trigger on the left; the logged-in identity
+ * (avatar + name/role) and logout on the right. Sits on the light canvas with a
+ * translucent blur so content scrolls cleanly underneath.
  */
 export function DashboardTopbar({ onMenuClick }: DashboardTopbarProps) {
   const { user, logout } = useAuth();
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-4 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 sm:px-6">
+    <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-4 bg-background/80 px-4 backdrop-blur-md sm:px-6 lg:h-20">
       <div className="flex min-w-0 items-center gap-2">
         <Button
           variant="ghost"
@@ -38,26 +40,24 @@ export function DashboardTopbar({ onMenuClick }: DashboardTopbarProps) {
         >
           <Menu className="h-5 w-5" />
         </Button>
-        <span className="truncate text-sm font-semibold sm:text-base">
-          Home Automation Quotation Management System
-        </span>
       </div>
 
       <div className="flex items-center gap-2 sm:gap-3">
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-            {initials(user?.name)}
-          </div>
-          <div className="hidden leading-tight sm:block">
-            <span className="block text-sm font-medium">{user?.name}</span>
+        <ThemeToggle />
+
+        <div className="flex items-center gap-3 rounded-full border border-border/70 bg-card p-1 pl-3 shadow-soft">
+          <div className="hidden text-right leading-tight sm:block">
+            <span className="block text-sm font-semibold text-foreground">{user?.name}</span>
             {user?.role?.name && (
               <span className="block text-xs text-muted-foreground">{user.role.name}</span>
             )}
           </div>
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+            {initials(user?.name)}
+          </div>
         </div>
-        <Button variant="outline" size="sm" onClick={() => logout()}>
+        <Button variant="outline" size="icon" onClick={() => logout()} aria-label="Logout">
           <LogOut className="h-4 w-4" />
-          <span className="hidden sm:inline">Logout</span>
         </Button>
       </div>
     </header>

@@ -139,7 +139,7 @@ export function QuotationWizard() {
 function Header() {
   return (
     <div>
-      <h1 className="text-2xl font-semibold tracking-tight">Generate Quotation</h1>
+      <h1 className="text-3xl font-bold tracking-tight">Generate Quotation</h1>
       <p className="text-sm text-muted-foreground">
         Fill customer details, pick categories &amp; products, then generate the merged PDF.
       </p>

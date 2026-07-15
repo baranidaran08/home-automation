@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useTableUrlState } from '@/hooks/use-table-url-state';
 import { ProductToolbar, ALL, type ProductFilters } from './product-toolbar';
-import { ProductTable } from './product-table';
+import { ProductGrid } from './product-grid';
 import { ProductFormDialog } from './product-form-dialog';
 import { ViewProductDialog } from './view-product-dialog';
 import { TablePagination } from '@/components/shared/table-pagination';
@@ -101,7 +101,7 @@ export function ProductManagement() {
   return (
     <div className="mx-auto max-w-7xl space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Products</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Products</h1>
         <p className="text-sm text-muted-foreground">
           Manage inventory. Each product belongs to one category.
         </p>
@@ -116,7 +116,7 @@ export function ProductManagement() {
         onAdd={handleAdd}
       />
 
-      <ProductTable
+      <ProductGrid
         products={products}
         isLoading={isLoading}
         onView={handleView}

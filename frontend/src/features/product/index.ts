@@ -1,5 +1,5 @@
 export { ProductManagement } from './components/product-management';
-export { ProductTable } from './components/product-table';
+export { ProductGrid } from './components/product-grid';
 export { ProductFormDialog } from './components/product-form-dialog';
 export { ProductImageUploader } from './components/product-image-uploader';
 export { useProducts } from './hooks/use-products';

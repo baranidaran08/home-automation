@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, ShieldCheck } from 'lucide-react';
+import { Eye, Loader2, Pencil, Plus, ShieldCheck, Trash2 } from 'lucide-react';
 
 import {
   Dialog,
@@ -27,7 +27,30 @@ import {
   resolvePermissionDependencies,
   DASHBOARD_READ,
 } from '@/lib/permission-dependencies';
+import { ACTIONS } from '@/constants/permissions';
+import { cn } from '@/lib/utils';
 import type { Role } from '@/types/rbac';
+
+/**
+ * Presentation layer for the CRUD actions: business-friendly labels and a fixed
+ * display order (View → Add → Edit → Delete). The underlying permission keys are
+ * unchanged (`read`/`create`/`update`/`delete`) — this only relabels/reorders the
+ * UI, so the API contract and the dependency engine are untouched.
+ */
+const ACTION_ORDER: string[] = [ACTIONS.READ, ACTIONS.CREATE, ACTIONS.UPDATE, ACTIONS.DELETE];
+
+const ACTION_META: Record<string, { label: string; icon: typeof Eye }> = {
+  [ACTIONS.READ]: { label: 'View', icon: Eye },
+  [ACTIONS.CREATE]: { label: 'Add', icon: Plus },
+  [ACTIONS.UPDATE]: { label: 'Edit', icon: Pencil },
+  [ACTIONS.DELETE]: { label: 'Delete', icon: Trash2 },
+};
+
+/** Sort rank for an action; unknown actions sort last. */
+const actionRank = (action: string) => {
+  const i = ACTION_ORDER.indexOf(action);
+  return i === -1 ? 99 : i;
+};
 
 interface RoleFormDialogProps {
   open: boolean;
@@ -213,41 +236,73 @@ export function RoleFormDialog({ open, onOpenChange, role }: RoleFormDialogProps
                 ))}
               </div>
             ) : (
-              <div className="divide-y rounded-md border">
+              <div className="space-y-2.5">
                 {groups.map((group) => {
                   const ids = group.permissions.map((p) => p._id);
                   const allSelected = ids.every((id) => selected.has(id));
+                  const activeCount = ids.filter((id) => selected.has(id)).length;
+                  // Fixed business order: View → Add → Edit → Delete.
+                  const ordered = [...group.permissions].sort(
+                    (a, b) => actionRank(a.action) - actionRank(b.action)
+                  );
+
                   return (
-                    <div key={group.module} className="p-3">
-                      <div className="mb-2 flex items-center justify-between">
-                        <span className="text-sm font-medium capitalize">{group.module}</span>
+                    <div
+                      key={group.module}
+                      className={cn(
+                        'rounded-xl border p-4 transition-colors',
+                        activeCount > 0 ? 'border-primary/25 bg-primary/[0.03]' : 'border-border/70 bg-card'
+                      )}
+                    >
+                      <div className="mb-3 flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold capitalize">{group.module}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {activeCount}/{ids.length}
+                          </span>
+                        </div>
                         <button
                           type="button"
                           onClick={() => toggleModule(ids, allSelected)}
-                          className="text-xs text-primary hover:underline"
+                          disabled={isSubmitting}
+                          className="text-xs font-semibold text-primary transition-opacity hover:opacity-70 disabled:opacity-50"
                         >
                           {allSelected ? 'Clear all' : 'Select all'}
                         </button>
                       </div>
-                      <div className="flex flex-wrap gap-x-6 gap-y-2">
-                        {group.permissions.map((p) => {
+
+                      <div className="flex flex-wrap gap-2">
+                        {ordered.map((p) => {
                           // Dashboard read is locked on while any other access exists.
                           const locked = p.key === DASHBOARD_READ && hasNonDashboardSelected;
+                          const isOn = selected.has(p._id);
+                          const meta = ACTION_META[p.action];
+                          const Icon = meta?.icon ?? Eye;
+                          const isDanger = p.action === ACTIONS.DELETE;
+
                           return (
-                            <label
+                            <button
                               key={p._id}
-                              className="flex cursor-pointer items-center gap-2 text-sm capitalize"
-                              title={locked ? 'Always required when any access is granted' : undefined}
+                              type="button"
+                              aria-pressed={isOn}
+                              onClick={() => togglePermission(p._id)}
+                              disabled={isSubmitting || locked}
+                              title={
+                                locked ? 'Always required when any access is granted' : undefined
+                              }
+                              className={cn(
+                                'inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all',
+                                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
+                                isOn && isDanger && 'border-destructive/30 bg-destructive/10 text-destructive',
+                                isOn && !isDanger && 'border-primary/30 bg-primary/10 text-primary shadow-soft',
+                                !isOn &&
+                                  'border-border bg-secondary/40 text-muted-foreground hover:border-primary/30 hover:text-foreground',
+                                (isSubmitting || locked) && 'cursor-not-allowed opacity-60'
+                              )}
                             >
-                              <input
-                                type="checkbox"
-                                className="h-4 w-4 accent-primary"
-                                checked={selected.has(p._id)}
-                                onChange={() => togglePermission(p._id)}
-                                disabled={isSubmitting || locked}
-                              />
-                              {p.action}
-                            </label>
+                              <Icon className="h-3.5 w-3.5" aria-hidden />
+                              {meta?.label ?? p.action}
+                            </button>
                           );
                         })}
                       </div>
@@ -259,9 +314,9 @@ export function RoleFormDialog({ open, onOpenChange, role }: RoleFormDialogProps
 
             {!isSuperAdmin && (
               <p className="text-xs text-muted-foreground">
-                Dependencies are enforced automatically: enabling Create, Update or Delete also
-                enables that module’s Read, quotations require Products, Categories and Templates
-                Read, and Dashboard access is always included.
+                Dependencies are enforced automatically: enabling Add, Edit or Delete also enables
+                that module’s View, quotations require Products, Categories and Templates View, and
+                Dashboard access is always included.
               </p>
             )}
           </div>

@@ -4,5 +4,5 @@
  */
 export const env = {
   apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:5000/api',
-  appName: process.env.NEXT_PUBLIC_APP_NAME ?? 'Home Automation Admin',
+  appName: process.env.NEXT_PUBLIC_APP_NAME ?? 'Xen Automation',
 } as const;

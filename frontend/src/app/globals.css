@@ -3,49 +3,85 @@
 @tailwind utilities;
 
 @layer base {
+  /**
+   * Xen Automation — premium enterprise SaaS palette.
+   * Indigo/violet primary on a soft light-gray canvas with pure-white cards.
+   * Only these tokens change the look; every component reads from them.
+   */
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* Canvas + surfaces */
+    --background: 228 39% 98%; /* #F8F9FC page canvas */
+    --foreground: 226 30% 14%; /* near-black ink */
+    --card: 0 0% 100%; /* white cards */
+    --card-foreground: 226 30% 14%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --radius: 0.5rem;
+    --popover-foreground: 226 30% 14%;
+
+    /* Indigo / violet brand */
+    --primary: 243 75% 59%; /* #4F46E5 */
+    --primary-foreground: 0 0% 100%;
+
+    /* Neutrals */
+    --secondary: 228 33% 96%;
+    --secondary-foreground: 226 25% 22%;
+    --muted: 228 33% 96%;
+    --muted-foreground: 224 12% 50%;
+    --accent: 243 75% 96%; /* tinted indigo hover wash */
+    --accent-foreground: 243 62% 42%;
+
+    /* Status */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 66% 40%;
+    --success-foreground: 0 0% 100%;
+    --warning: 32 94% 44%;
+    --warning-foreground: 0 0% 100%;
+
+    /* Lines + focus */
+    --border: 228 26% 92%;
+    --input: 228 26% 90%;
+    --ring: 243 75% 59%;
+
+    --radius: 0.75rem;
   }
 
+  /**
+   * Dark mode. Two deliberate departures from the light palette:
+   *  1. Surfaces carry the elevation, not shadows. `shadow-*` is black, so it is
+   *     invisible on a dark canvas — `--card` must therefore sit clearly lighter
+   *     than `--background` (~7 points) or cards look flat against the page.
+   *  2. The brand violet is desaturated. Re-using the light-mode saturation on a
+   *     dark canvas makes highly-saturated blue-violets optically vibrate and
+   *     read "neon" rather than premium.
+   */
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --background: 228 26% 6%; /* #0B0D13 */
+    --foreground: 228 30% 96%;
+    --card: 228 16% 17%; /* #242732 — a clear step above the canvas */
+    --card-foreground: 228 30% 96%;
+    --popover: 228 16% 17%;
+    --popover-foreground: 228 30% 96%;
+
+    --primary: 244 65% 72%; /* #8E88E8 — airy periwinkle; gentler at night */
+    --primary-foreground: 228 40% 10%;
+
+    --secondary: 228 14% 23%;
+    --secondary-foreground: 228 30% 96%;
+    --muted: 228 14% 23%;
+    --muted-foreground: 224 12% 68%;
+    --accent: 243 30% 24%;
+    --accent-foreground: 243 85% 88%;
+
+    --destructive: 0 65% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 60% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 32 90% 52%;
+    --warning-foreground: 228 40% 10%;
+
+    --border: 228 12% 30%;
+    --input: 228 12% 32%;
+    --ring: 244 65% 72%;
   }
 }
 

@@ -80,7 +80,7 @@ export function TemplateManagement() {
   return (
     <div className="mx-auto max-w-7xl space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Templates</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Templates</h1>
         <p className="text-sm text-muted-foreground">
           Word (.docx) quotation templates — one per category. Used to generate quotations later.
         </p>

@@ -9,13 +9,16 @@ export function StatusBadge({ status }: { status: 'active' | 'inactive' }) {
       variant="outline"
       className={cn(
         'gap-1.5 capitalize',
+        // The fill is translucent, so it needs a stronger alpha on the dark
+        // canvas: 10% green over a dark card is only ~3 RGB points and reads as
+        // transparent. Light mode is unchanged.
         isActive
-          ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-          : 'border-muted-foreground/30 bg-muted text-muted-foreground'
+          ? 'border-success/20 bg-success/10 text-success dark:border-success/40 dark:bg-success/25'
+          : 'border-border bg-muted text-muted-foreground'
       )}
     >
       <span
-        className={cn('h-1.5 w-1.5 rounded-full', isActive ? 'bg-emerald-500' : 'bg-muted-foreground')}
+        className={cn('h-1.5 w-1.5 rounded-full', isActive ? 'bg-success' : 'bg-muted-foreground')}
       />
       {status}
     </Badge>

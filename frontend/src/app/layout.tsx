@@ -11,7 +11,8 @@ export const metadata: Metadata = {
     default: env.appName,
     template: `%s | ${env.appName}`,
   },
-  description: 'Admin panel for managing home automation products, templates, and quotations.',
+  description:
+    'Xen Automation — enterprise platform for managing smart home products, templates, and quotations.',
 };
 
 export default function RootLayout({
