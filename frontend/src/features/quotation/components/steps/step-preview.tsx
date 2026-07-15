@@ -106,7 +106,11 @@ export function StepPreview({ wizard }: { wizard: QuotationWizardState }) {
                   ))}
                 </TableBody>
               </Table>
-              <div className="ml-auto max-w-xs space-y-1 text-sm">
+              {/* On phones span the full width with the table's own cell padding,
+                  so labels/amounts line up with the columns above. Capping at
+                  max-w-xs there would indent the block and break that alignment.
+                  From `sm` up it returns to a right-aligned 320px block. */}
+              <div className="ml-auto w-full space-y-1 px-4 text-sm sm:max-w-xs sm:px-0">
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Product Total</span>
                   <span className="font-medium">{formatCurrency(c.productTotal)}</span>

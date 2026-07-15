@@ -45,7 +45,11 @@ export function DashboardTopbar({ onMenuClick }: DashboardTopbarProps) {
       <div className="flex items-center gap-2 sm:gap-3">
         <ThemeToggle />
 
-        <div className="flex items-center gap-3 rounded-full border border-border/70 bg-card p-1 pl-3 shadow-soft">
+        {/* The pill chrome only applies once the name/role is visible (`sm` up).
+            On phones the text is hidden, and keeping the pill's asymmetric
+            padding would leave dead space beside the avatar and render a
+            lopsided oblong — there, the bare avatar is the whole control. */}
+        <div className="flex items-center gap-3 rounded-full sm:border sm:border-border/70 sm:bg-card sm:p-1 sm:pl-3 sm:shadow-soft">
           <div className="hidden text-right leading-tight sm:block">
             <span className="block text-sm font-semibold text-foreground">{user?.name}</span>
             {user?.role?.name && (
