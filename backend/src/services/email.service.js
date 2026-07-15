@@ -27,6 +27,12 @@ const getTransporter = () => {
     // via STARTTLS (secure=false) — Nodemailer negotiates that automatically.
     secure: env.smtp.port === 465,
     auth: { user: env.smtp.user, pass: env.smtp.pass },
+    // Hard timeouts so a blocked/slow SMTP host (common on cloud platforms like
+    // Render) fails fast instead of hanging the caller. Without these, a blocked
+    // outbound SMTP port can stall for a minute or more.
+    connectionTimeout: 10_000, // TCP connect
+    greetingTimeout: 10_000, // wait for the server 220 greeting
+    socketTimeout: 15_000, // inactivity on the socket
   });
   return transporter;
 };

@@ -128,17 +128,20 @@ const requestPasswordReset = async (email) => {
 
   const resetUrl = `${env.app.frontendUrl}/reset-password?token=${token}`;
 
-  try {
-    await emailService.sendResetPasswordEmail({
+  // Fire-and-forget (same reasoning as the welcome email): never block the HTTP
+  // response on SMTP. The generic success message is returned to the client
+  // regardless, so a slow/blocked mail host can't stall or time out the request.
+  emailService
+    .sendResetPasswordEmail({
       name: user.name,
       email: user.email,
       resetUrl,
       expiresMinutes,
-    });
-    logger.info(`[auth] Password reset link sent to ${user.email}`);
-  } catch (err) {
-    logger.error(`[auth] Failed to send reset email to ${user.email}: ${err.message}`);
-  }
+    })
+    .then(() => logger.info(`[auth] Password reset link sent to ${user.email}`))
+    .catch((err) =>
+      logger.error(`[auth] Failed to send reset email to ${user.email}: ${err.message}`)
+    );
 };
 
 /**

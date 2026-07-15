@@ -81,20 +81,19 @@ const createUser = async ({ name, email, role }) => {
   });
   await user.save(); // pre-save hook hashes the temporary password
 
-  // Best-effort welcome email carrying the temporary password. The user is
-  // already saved, so a mail failure must NOT fail the request — we catch and
-  // log instead of rethrowing. We email the plaintext `temporaryPassword`, not
-  // `user.password` (which is now the bcrypt hash).
-  try {
-    await emailService.sendWelcomeEmail({
+  // Best-effort welcome email carrying the temporary password. Fire-and-forget:
+  // we do NOT await it, so a slow/blocked SMTP host can never delay (or time out)
+  // the API response — the account is already saved. Failures are just logged.
+  // We email the plaintext `temporaryPassword`, not `user.password` (now hashed).
+  emailService
+    .sendWelcomeEmail({
       name: user.name,
       email: user.email,
       password: temporaryPassword,
       roleName: roleDoc.name,
-    });
-  } catch (err) {
-    logger.error(`[user] Welcome email failed for ${user.email}: ${err.message}`);
-  }
+    })
+    .then(() => logger.info(`[user] Welcome email queued for ${user.email}`))
+    .catch((err) => logger.error(`[user] Welcome email failed for ${user.email}: ${err.message}`));
 
   return user.populate(POPULATE);
 };
