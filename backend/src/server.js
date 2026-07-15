@@ -31,7 +31,7 @@ const start = async () => {
   const app = createApp();
   const server = app.listen(env.port, () => {
     logger.info(`Server listening on http://localhost:${env.port} (${env.nodeEnv})`);
-    logger.info(`Health check: http://localhost:${env.port}/api/${env.apiVersion}/health`);
+    logger.info(`Health check: http://localhost:${env.port}/api/health`);
   });
 
   const shutdown = async (signal) => {

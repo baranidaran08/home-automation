@@ -36,7 +36,6 @@ const env = {
   isTest: NODE_ENV === 'test',
 
   port: parseInt(optional('PORT', '5000'), 10),
-  apiVersion: optional('API_VERSION', 'v1'),
 
   corsOrigin: optional('CORS_ORIGIN', 'http://localhost:3000')
     .split(',')

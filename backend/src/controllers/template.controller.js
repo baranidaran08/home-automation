@@ -5,31 +5,31 @@ const ApiResponse = require('../utils/ApiResponse');
 const templateService = require('../services/template.service');
 const { MESSAGES } = require('../constants');
 
-/** GET /api/v1/templates — list with search + category filter + pagination. */
+/** GET /api/templates — list with search + category filter + pagination. */
 const list = asyncHandler(async (req, res) => {
   const { items, meta } = await templateService.getTemplates(req.query);
   return ApiResponse.ok(res, items, MESSAGES.TEMPLATES_FETCHED, meta);
 });
 
-/** GET /api/v1/templates/:id */
+/** GET /api/templates/:id */
 const getById = asyncHandler(async (req, res) => {
   const template = await templateService.getTemplateById(req.params.id);
   return ApiResponse.ok(res, template, MESSAGES.TEMPLATE_FETCHED);
 });
 
-/** GET /api/v1/templates/:id/download — redirect to a force-download URL. */
+/** GET /api/templates/:id/download — redirect to a force-download URL. */
 const download = asyncHandler(async (req, res) => {
   const url = await templateService.getDownloadUrl(req.params.id);
   return res.redirect(url);
 });
 
-/** POST /api/v1/templates (multipart: templateFile = .docx) */
+/** POST /api/templates (multipart: templateFile = .docx) */
 const create = asyncHandler(async (req, res) => {
   const template = await templateService.createTemplate({ data: req.body, file: req.file });
   return ApiResponse.created(res, template, MESSAGES.TEMPLATE_CREATED);
 });
 
-/** PATCH /api/v1/templates/:id (multipart: optional templateFile → replace) */
+/** PATCH /api/templates/:id (multipart: optional templateFile → replace) */
 const update = asyncHandler(async (req, res) => {
   const template = await templateService.updateTemplate(req.params.id, {
     data: req.body,
@@ -38,7 +38,7 @@ const update = asyncHandler(async (req, res) => {
   return ApiResponse.ok(res, template, MESSAGES.TEMPLATE_UPDATED);
 });
 
-/** DELETE /api/v1/templates/:id */
+/** DELETE /api/templates/:id */
 const remove = asyncHandler(async (req, res) => {
   const template = await templateService.deleteTemplate(req.params.id);
   return ApiResponse.ok(res, { id: template._id }, MESSAGES.TEMPLATE_DELETED);

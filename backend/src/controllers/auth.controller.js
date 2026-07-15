@@ -8,7 +8,7 @@ const { setAuthCookie, clearAuthCookie } = require('../utils/cookie');
 const { MESSAGES } = require('../constants');
 
 /**
- * POST /api/v1/auth/login
+ * POST /api/auth/login
  * Validates credentials, sets the JWT as an httpOnly cookie, and returns the
  * user profile (with role + permissions). The token is intentionally NOT
  * returned in the body — it lives only in the httpOnly cookie.
@@ -20,7 +20,7 @@ const login = asyncHandler(async (req, res) => {
 });
 
 /**
- * POST /api/v1/auth/logout
+ * POST /api/auth/logout
  * Clears the auth cookie. Safe to call whether or not a session exists.
  */
 const logout = asyncHandler(async (_req, res) => {
@@ -29,7 +29,7 @@ const logout = asyncHandler(async (_req, res) => {
 });
 
 /**
- * GET /api/v1/auth/me   (protected)
+ * GET /api/auth/me   (protected)
  * Returns the currently authenticated user, including their live role and
  * permission keys (attached/resolved by `authenticate`).
  */
@@ -38,7 +38,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 });
 
 /**
- * POST /api/v1/auth/change-password   (protected)
+ * POST /api/auth/change-password   (protected)
  * Lets the authenticated user replace their (temporary) password. On success the
  * `mustChangePassword` lock is cleared and the updated user is returned so the
  * client can refresh its session and leave the change-password screen.
@@ -49,7 +49,7 @@ const changePassword = asyncHandler(async (req, res) => {
 });
 
 /**
- * POST /api/v1/auth/forgot-password   (public)
+ * POST /api/auth/forgot-password   (public)
  * Starts the reset flow. Always responds with the same generic message so it can
  * never be used to discover which emails are registered.
  */
@@ -59,7 +59,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
 });
 
 /**
- * POST /api/v1/auth/reset-password   (public)
+ * POST /api/auth/reset-password   (public)
  * Completes the reset flow using the one-time token from the email link.
  */
 const resetPassword = asyncHandler(async (req, res) => {

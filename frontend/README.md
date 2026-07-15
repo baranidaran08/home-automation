@@ -19,7 +19,7 @@ npm run dev                  # http://localhost:3000
 ```
 
 The backend should be running at the URL in `NEXT_PUBLIC_API_BASE_URL`
-(default `http://localhost:5000/api/v1`).
+(default `http://localhost:5000/api`).
 
 ### Scripts
 

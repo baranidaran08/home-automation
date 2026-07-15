@@ -42,7 +42,7 @@ const createApp = () => {
   // --- HTTP request logging ---
   app.use(morgan(env.isProduction ? 'combined' : 'dev', { stream: logger.stream }));
 
-  // --- API routes (versioned under /api) ---
+  // --- API routes (mounted under /api) ---
   app.use('/api', apiRoutes);
 
   // Root ping so hitting the bare host returns something friendly.
@@ -50,7 +50,7 @@ const createApp = () => {
     res.json({
       success: true,
       message: 'Home Automation Quotation Management System API',
-      docs: `/api/${env.apiVersion}/health`,
+      docs: '/api/health',
     });
   });
 

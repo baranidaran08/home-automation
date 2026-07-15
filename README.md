@@ -35,7 +35,7 @@ cp .env.example .env.local
 npm run dev               # http://localhost:3000
 ```
 
-Verify the API is up: `GET http://localhost:5000/api/v1/health`.
+Verify the API is up: `GET http://localhost:5000/api/health`.
 
 ## Prerequisites
 

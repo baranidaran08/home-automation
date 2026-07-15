@@ -5,7 +5,7 @@ import type { ApiErrorResponse } from '@/types';
 /**
  * Pre-configured Axios instance for talking to the backend API.
  *
- * - Base URL points at the versioned API (`/api/v1`).
+ * - Base URL points at the versioned API (`/api`).
  * - A request interceptor attaches the auth token (wired up when the auth
  *   module lands).
  * - A response interceptor unwraps errors into a predictable shape.

@@ -33,7 +33,7 @@ A local MongoDB must be running (or set `MONGODB_URI` to an Atlas cluster).
 
 ## API
 
-Base URL: `http://localhost:5000/api/v1`
+Base URL: `http://localhost:5000/api`
 
 | Method | Endpoint       | Auth   | Description                          |
 | ------ | -------------- | ------ | ------------------------------------ |
@@ -65,7 +65,7 @@ backend/
 │   ├── controllers/    # request handlers (thin)
 │   ├── middleware/      # error handler, notFound, validate
 │   ├── models/         # Mongoose schemas (empty)
-│   ├── routes/         # versioned routers (/api/v1)
+│   ├── routes/         # versioned routers (/api)
 │   │   └── v1/
 │   ├── services/       # business logic (empty)
 │   ├── utils/          # ApiError, ApiResponse, asyncHandler, logger

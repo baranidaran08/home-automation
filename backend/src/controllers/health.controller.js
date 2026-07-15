@@ -9,7 +9,7 @@ const env = require('../config/env');
 const MONGO_STATES = ['disconnected', 'connected', 'connecting', 'disconnecting'];
 
 /**
- * GET /api/v1/health
+ * GET /api/health
  * Lightweight liveness/readiness probe reporting process uptime and the
  * current MongoDB connection state.
  */

@@ -1,14 +1,32 @@
 'use strict';
 
 const { Router } = require('express');
-const v1Routes = require('./v1');
+const healthRoutes = require('./health.routes');
+const authRoutes = require('./auth.routes');
+const dashboardRoutes = require('./dashboard.routes');
+const categoryRoutes = require('./category.routes');
+const productRoutes = require('./product.routes');
+const templateRoutes = require('./template.routes');
+const quotationRoutes = require('./quotation.routes');
+const userRoutes = require('./user.routes');
+const roleRoutes = require('./role.routes');
+const permissionRoutes = require('./permission.routes');
 
 /**
- * Top-level router. Delegates to versioned sub-routers. Adding /api/v2 later
- * is a one-line change here and requires no refactor of existing modules.
+ * Top-level API router, mounted at `/api` in app.js. Every module router is
+ * aggregated here, so the full paths are `/api/<module>` (e.g. `/api/auth/login`).
  */
 const router = Router();
 
-router.use('/v1', v1Routes);
+router.use('/health', healthRoutes);
+router.use('/auth', authRoutes);
+router.use('/dashboard', dashboardRoutes);
+router.use('/categories', categoryRoutes);
+router.use('/products', productRoutes);
+router.use('/templates', templateRoutes);
+router.use('/quotations', quotationRoutes);
+router.use('/users', userRoutes);
+router.use('/roles', roleRoutes);
+router.use('/permissions', permissionRoutes);
 
 module.exports = router;

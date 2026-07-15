@@ -6,7 +6,7 @@ const dashboardService = require('../services/dashboard.service');
 const { MESSAGES } = require('../constants');
 
 /**
- * GET /api/v1/dashboard/summary   (protected)
+ * GET /api/dashboard/summary   (protected)
  * Returns aggregate counts for the admin dashboard overview.
  */
 const getSummary = asyncHandler(async (_req, res) => {
