@@ -1,15 +1,12 @@
 'use strict';
 
-const { promisify } = require('util');
 const PizZip = require('pizzip');
 const Docxtemplater = require('docxtemplater');
-const libre = require('libreoffice-convert');
 const { PDFDocument } = require('pdf-lib');
 const ApiError = require('../utils/ApiError');
 const logger = require('../utils/logger');
+const { convertDocxToPdf } = require('./docx-to-pdf.service');
 const { MESSAGES } = require('../constants');
-
-const convertAsync = promisify(libre.convert);
 
 // Sentinel inserted for {{product_table}} then swapped for a real Word table.
 const TABLE_MARKER = 'PRODUCTTABLEMARKERX9Z';
@@ -192,17 +189,12 @@ const fillCategoryDocx = (templateBuffer, mergeData, items) => {
   return buf;
 };
 
-// ---- DOCX -> PDF (LibreOffice) ---------------------------------------------
+// ---- DOCX -> PDF -----------------------------------------------------------
 
-const convertToPdf = async (docxBuffer) => {
-  try {
-    return await convertAsync(docxBuffer, '.pdf', undefined);
-  } catch (err) {
-    logger.error(`[quotation] PDF conversion failed: ${err.message}`);
-    // Operational so the actionable reason reaches the client (e.g. LibreOffice missing).
-    throw ApiError.serviceUnavailable(MESSAGES.PDF_CONVERT_FAILED);
-  }
-};
+// Delegated to docx-to-pdf.service, which picks the strategy (remote CloudConvert
+// over HTTPS on serverless, local LibreOffice in development) and raises the
+// operational 503 itself.
+const convertToPdf = (docxBuffer) => convertDocxToPdf(docxBuffer);
 
 // ---- Merge PDFs (pdf-lib) ---------------------------------------------------
 

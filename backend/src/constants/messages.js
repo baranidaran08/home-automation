@@ -113,7 +113,7 @@ const MESSAGES = {
   QUOTATION_TEMPLATE_MISSING: 'No Word template exists for one or more selected categories',
   QUOTATION_GENERATION_FAILED: 'Failed to generate the quotation document',
   PDF_CONVERT_FAILED:
-    'Failed to convert the document to PDF. Ensure LibreOffice is installed on the server.',
+    'Failed to convert the document to PDF. Please try again, or contact support if this continues.',
 };
 
 module.exports = { MESSAGES };

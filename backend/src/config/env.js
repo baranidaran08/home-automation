@@ -84,6 +84,14 @@ const env = {
     maxFileSizeBytes: parseInt(optional('MAX_FILE_SIZE_MB', '10'), 10) * 1024 * 1024,
   },
 
+  // DOCX -> PDF conversion. When an API key is present the conversion is done
+  // remotely over HTTPS (required on serverless hosts, which cannot run the
+  // LibreOffice binary); when absent we fall back to a local LibreOffice install,
+  // which keeps local development working offline with no key.
+  cloudconvert: {
+    apiKey: optional('CLOUDCONVERT_API_KEY', ''),
+  },
+
   // Outbound email (SMTP). All optional so the app still boots without mail
   // configured — the email service checks `isConfigured` and skips sending if
   // credentials are missing, and a send failure never breaks the request.
