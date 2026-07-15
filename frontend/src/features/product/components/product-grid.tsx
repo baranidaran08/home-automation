@@ -62,8 +62,11 @@ function ProductCard({
           <StatusBadge status={product.status} />
         </div>
 
-        {/* Actions: always visible on touch; revealed on hover/keyboard focus on desktop. */}
-        <div className="absolute right-1.5 top-1.5 flex items-center gap-1 transition-opacity duration-200 sm:right-2 sm:top-2 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
+        {/* Actions: always visible on touch; revealed on hover/keyboard focus on desktop.
+            Stacked vertically on phones — in the 2-up grid a card is only ~173px
+            wide, so a horizontal row (~98px) plus the status badge (~92px) would
+            overrun the card and collide. From `sm` up there is room for a row. */}
+        <div className="absolute right-1.5 top-1.5 flex flex-col items-center gap-1 transition-opacity duration-200 sm:right-2 sm:top-2 sm:flex-row sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
           <Button
             variant="outline"
             size="icon"
