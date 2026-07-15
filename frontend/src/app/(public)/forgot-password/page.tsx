@@ -8,8 +8,9 @@ export const metadata: Metadata = {
 };
 
 /**
- * Forgot-password page. Wrapped by the (auth) layout's GuestGuard. Collects the
- * account email and triggers the reset-link email.
+ * Forgot-password page. Public (no GuestGuard) so it opens for any visitor,
+ * authenticated or not. Collects the account email and triggers the reset-link
+ * email.
  */
 export default function ForgotPasswordPage() {
   return (

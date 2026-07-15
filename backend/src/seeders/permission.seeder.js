@@ -15,21 +15,32 @@ const { PERMISSION_MATRIX, permissionKey } = require('../constants/permissions')
  */
 const seedPermissions = async () => {
   const byKey = new Map();
+  let inserted = 0;
 
   for (const [module, actions] of Object.entries(PERMISSION_MATRIX)) {
     for (const action of actions) {
       const key = permissionKey(module, action);
+      // `includeResultMetadata` exposes `lastErrorObject.upserted`, which is set
+      // only when this call actually INSERTED a new document — letting us report
+      // "skipped" vs "inserted" precisely instead of blindly counting upserts.
       // eslint-disable-next-line no-await-in-loop
-      const permission = await Permission.findOneAndUpdate(
+      const res = await Permission.findOneAndUpdate(
         { key },
         { key, module, action, description: `Can ${action} ${module}` },
-        { upsert: true, new: true, setDefaultsOnInsert: true }
+        { upsert: true, new: true, setDefaultsOnInsert: true, includeResultMetadata: true }
       );
-      byKey.set(key, permission);
+      if (res.lastErrorObject?.upserted) inserted += 1;
+      byKey.set(key, res.value);
     }
   }
 
-  logger.info(`[seed:permissions] Upserted ${byKey.size} permissions.`);
+  if (inserted === 0) {
+    logger.info(`[seed:permissions] ✓ Permissions already exist (${byKey.size}). Skipping...`);
+  } else {
+    logger.info(
+      `[seed:permissions] ✓ ${inserted} missing permission(s) inserted (${byKey.size} total).`
+    );
+  }
   return byKey;
 };
 

@@ -5,6 +5,7 @@ const env = require('./config/env');
 const logger = require('./utils/logger');
 const { connectDatabase, disconnectDatabase } = require('./config/database');
 const { configureCloudinary } = require('./config/cloudinary');
+const { seedDatabase } = require('./seeders/bootstrap');
 
 /**
  * Process bootstrap: configure integrations, connect to the database, then
@@ -16,6 +17,16 @@ const start = async () => {
   configureCloudinary();
 
   await connectDatabase();
+
+  // Auto-seed default system data (permissions, roles, Super Admin) once the DB
+  // is connected and before we accept requests. Idempotent — safe on every Render
+  // deploy/restart. Non-fatal: a seeding hiccup is logged loudly but must not stop
+  // the API from coming up (existing data is never the cause of a failure here).
+  try {
+    await seedDatabase();
+  } catch (err) {
+    logger.error(`Database seeding failed (continuing startup): ${err.stack || err.message}`);
+  }
 
   const app = createApp();
   const server = app.listen(env.port, () => {

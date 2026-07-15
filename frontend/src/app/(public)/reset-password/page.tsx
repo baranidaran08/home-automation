@@ -9,9 +9,11 @@ export const metadata: Metadata = {
 };
 
 /**
- * Reset-password page. Wrapped by the (auth) layout's GuestGuard. The token is
- * read from the `?token=` query param inside a Suspense boundary (required by
- * `useSearchParams`) and passed to the reset form.
+ * Reset-password page. Public (no GuestGuard) so it ALWAYS opens from an email
+ * link — even when the user already has a live session — instead of being
+ * redirected to the dashboard. The token is read from the `?token=` query param
+ * inside a Suspense boundary (required by `useSearchParams`) and passed to the
+ * reset form, which then lets the backend validate/expire it.
  */
 export default function ResetPasswordPage() {
   return (

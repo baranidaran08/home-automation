@@ -40,9 +40,9 @@ const seedUser = async () => {
     }
     if (changed) {
       await existing.save();
-      logger.info(`[seed:user] Reconciled Root Super Admin (${existing.email}).`);
+      logger.info(`[seed:user] ✓ Reconciled System Admin (${existing.email}).`);
     } else {
-      logger.info(`[seed:user] Root Super Admin already exists (${existing.email}) — skipping.`);
+      logger.info(`[seed:user] ✓ System Admin already exists (${existing.email}). Skipping...`);
     }
     return existing;
   }
@@ -56,7 +56,7 @@ const seedUser = async () => {
   });
   await user.save();
 
-  logger.info(`[seed:user] Root Super Admin user created: ${user.email}`);
+  logger.info(`[seed:user] ✓ System Admin (Root Super Admin) created: ${user.email}`);
   logger.warn('[seed:user] Change the default password after first login.');
   return user;
 };

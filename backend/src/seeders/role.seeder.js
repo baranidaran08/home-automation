@@ -31,11 +31,14 @@ const seedRoles = async () => {
 
   const seededNames = DEFAULT_ROLES.map((d) => d.name);
   const byName = new Map();
+  let inserted = 0;
 
   for (const def of DEFAULT_ROLES) {
     const permissions = idsFor(def.permissions);
+    // `includeResultMetadata` lets us tell an INSERT (new role) apart from an
+    // UPDATE (existing role whose permission set we keep in sync).
     // eslint-disable-next-line no-await-in-loop
-    const role = await Role.findOneAndUpdate(
+    const res = await Role.findOneAndUpdate(
       { name: def.name },
       {
         name: def.name,
@@ -44,12 +47,17 @@ const seedRoles = async () => {
         isSuperAdmin: def.isSuperAdmin,
         isSystem: def.isSystem,
       },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, new: true, setDefaultsOnInsert: true, includeResultMetadata: true }
     );
-    byName.set(def.name, role);
+    if (res.lastErrorObject?.upserted) inserted += 1;
+    byName.set(def.name, res.value);
   }
 
-  logger.info(`[seed:roles] Upserted ${byName.size} system role(s): ${seededNames.join(', ')}.`);
+  if (inserted === 0) {
+    logger.info(`[seed:roles] ✓ Roles already exist (${byName.size}). Skipping...`);
+  } else {
+    logger.info(`[seed:roles] ✓ ${inserted} missing role(s) inserted: ${seededNames.join(', ')}.`);
+  }
 
   // Reconcile earlier installs: previous versions seeded business roles (Sales
   // Executive, Inventory Manager, Template Designer) as protected system roles.
