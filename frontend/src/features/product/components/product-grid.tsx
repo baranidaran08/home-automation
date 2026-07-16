@@ -1,6 +1,6 @@
 'use client';
 
-import { Eye, Pencil, Trash2, Package, ImageOff } from 'lucide-react';
+import { Pencil, Trash2, Package, ImageOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StatusBadge } from '@/components/shared/status-badge';
@@ -41,6 +41,17 @@ function ProductCard({
 
   return (
     <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/70 bg-card shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-float">
+      {/* The whole card opens the product details. An invisible button covering
+          the card (rather than onClick on the article) keeps this a real,
+          keyboard-focusable control; edit/delete sit above it on z-20 so they
+          receive their own clicks. */}
+      <button
+        type="button"
+        onClick={() => onView(product)}
+        aria-label={`View ${product.productName}`}
+        className="absolute inset-0 z-10 cursor-pointer rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      />
+
       {/* Media */}
       <div className={MEDIA}>
         {image ? (
@@ -66,16 +77,7 @@ function ProductCard({
             Stacked vertically on phones — in the 2-up grid a card is only ~173px
             wide, so a horizontal row (~98px) plus the status badge (~92px) would
             overrun the card and collide. From `sm` up there is room for a row. */}
-        <div className="absolute right-1.5 top-1.5 flex flex-col items-center gap-1 transition-opacity duration-200 sm:right-2 sm:top-2 sm:flex-row sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-7 w-7 bg-card/90 backdrop-blur sm:h-8 sm:w-8"
-            onClick={() => onView(product)}
-            aria-label={`View ${product.productName}`}
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
+        <div className="absolute right-1.5 top-1.5 z-20 flex flex-col items-center gap-1 transition-opacity duration-200 sm:right-2 sm:top-2 sm:flex-row sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
           <PermissionGate module={MODULES.PRODUCTS} action={ACTIONS.UPDATE}>
             <Button
               variant="outline"
