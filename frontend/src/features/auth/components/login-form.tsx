@@ -10,6 +10,7 @@ import { ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useAuth } from '../hooks/use-auth';
+import { useTransitionOverlayStore } from '@/store/transition.store';
 import { XenField } from './xen-field';
 import { XenButton } from './xen-button';
 import { loginSchema, type LoginFormValues } from '../schemas/login.schema';
@@ -25,6 +26,7 @@ import type { NormalizedApiError } from '@/lib/axios';
 export function LoginForm() {
   const router = useRouter();
   const { login } = useAuth();
+  const playTransition = useTransitionOverlayStore((s) => s.start);
   const [showPassword, setShowPassword] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const reduce = useReducedMotion();
@@ -48,6 +50,10 @@ export function LoginForm() {
         toast.success('Please set a new password to continue');
         router.replace(ROUTES.changePassword);
       } else {
+        // Cover the guard-driven navigation with the brand transition. Purely
+        // visual: auth state is already set and the redirect below (plus
+        // GuestGuard's own) proceed underneath it, exactly as before.
+        playTransition();
         toast.success('Welcome back!');
         router.replace(ROUTES.dashboard.root);
       }
