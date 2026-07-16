@@ -6,6 +6,7 @@ const logger = require('../utils/logger');
 const { signAccessToken } = require('../utils/jwt');
 const { rolePermissionKeys, serializeAuthUser } = require('../utils/rbac');
 const { generateResetToken, hashResetToken } = require('../utils/reset-token');
+const { runInBackground } = require('../utils/background');
 const emailService = require('./email.service');
 const env = require('../config/env');
 const { MESSAGES } = require('../constants');
@@ -130,18 +131,24 @@ const requestPasswordReset = async (email) => {
 
   // Fire-and-forget (same reasoning as the welcome email): never block the HTTP
   // response on SMTP. The generic success message is returned to the client
-  // regardless, so a slow/blocked mail host can't stall or time out the request.
-  emailService
-    .sendResetPasswordEmail({
-      name: user.name,
-      email: user.email,
-      resetUrl,
-      expiresMinutes,
-    })
-    .then(() => logger.info(`[auth] Password reset link sent to ${user.email}`))
-    .catch((err) =>
-      logger.error(`[auth] Failed to send reset email to ${user.email}: ${err.message}`)
-    );
+  // regardless, so a slow/blocked mail host can't stall or time out the request
+  // — and the identical response timing is part of not revealing whether the
+  // email exists. `runInBackground` keeps the serverless instance alive until
+  // the send settles; without it Vercel may suspend the function on response,
+  // freezing the SMTP handshake ("Connection timeout").
+  runInBackground(
+    emailService
+      .sendResetPasswordEmail({
+        name: user.name,
+        email: user.email,
+        resetUrl,
+        expiresMinutes,
+      })
+      .then(() => logger.info(`[auth] Password reset link sent to ${user.email}`))
+      .catch((err) =>
+        logger.error(`[auth] Failed to send reset email to ${user.email}: ${err.message}`)
+      )
+  );
 };
 
 /**

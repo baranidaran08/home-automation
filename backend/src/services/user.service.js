@@ -8,6 +8,7 @@ const { escapeRegExp } = require('../utils/text');
 const { resolvePagination, buildPaginationMeta } = require('../utils/pagination');
 const emailService = require('./email.service');
 const { generateTemporaryPassword } = require('../utils/password');
+const { runInBackground } = require('../utils/background');
 const { MESSAGES } = require('../constants');
 
 /**
@@ -85,15 +86,20 @@ const createUser = async ({ name, email, role }) => {
   // we do NOT await it, so a slow/blocked SMTP host can never delay (or time out)
   // the API response — the account is already saved. Failures are just logged.
   // We email the plaintext `temporaryPassword`, not `user.password` (now hashed).
-  emailService
-    .sendWelcomeEmail({
-      name: user.name,
-      email: user.email,
-      password: temporaryPassword,
-      roleName: roleDoc.name,
-    })
-    .then(() => logger.info(`[user] Welcome email queued for ${user.email}`))
-    .catch((err) => logger.error(`[user] Welcome email failed for ${user.email}: ${err.message}`));
+  // `runInBackground` keeps the serverless instance alive until the send
+  // settles; without it Vercel may suspend the function on response, freezing
+  // the SMTP handshake ("Connection timeout").
+  runInBackground(
+    emailService
+      .sendWelcomeEmail({
+        name: user.name,
+        email: user.email,
+        password: temporaryPassword,
+        roleName: roleDoc.name,
+      })
+      .then(() => logger.info(`[user] Welcome email queued for ${user.email}`))
+      .catch((err) => logger.error(`[user] Welcome email failed for ${user.email}: ${err.message}`))
+  );
 
   return user.populate(POPULATE);
 };
