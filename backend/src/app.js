@@ -9,6 +9,7 @@ const cookieParser = require('cookie-parser');
 
 const env = require('./config/env');
 const logger = require('./utils/logger');
+const { APP_NAME } = require('./constants');
 const apiRoutes = require('./routes');
 const notFound = require('./middleware/notFound');
 const errorHandler = require('./middleware/errorHandler');
@@ -49,7 +50,7 @@ const createApp = () => {
   app.get('/', (_req, res) => {
     res.json({
       success: true,
-      message: 'Home Automation Quotation Management System API',
+      message: `${APP_NAME} API`,
       docs: '/api/health',
     });
   });

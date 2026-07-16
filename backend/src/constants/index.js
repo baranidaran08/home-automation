@@ -1,5 +1,6 @@
 'use strict';
 
+const { APP_NAME } = require('./app');
 const { HTTP_STATUS } = require('./httpStatus');
 const { MESSAGES } = require('./messages');
 const { COLLECTIONS, PRODUCT_STOCK_FIELD } = require('./collections');
@@ -17,6 +18,7 @@ const {
 const { DEFAULT_ROLES, SUPER_ADMIN } = require('./rbac');
 
 module.exports = {
+  APP_NAME,
   HTTP_STATUS,
   MESSAGES,
   COLLECTIONS,
