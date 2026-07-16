@@ -52,9 +52,10 @@ export function LoginForm() {
       } else {
         // Cover the guard-driven navigation with the brand transition. Purely
         // visual: auth state is already set and the redirect below (plus
-        // GuestGuard's own) proceed underneath it, exactly as before.
+        // GuestGuard's own) proceed underneath it, exactly as before. The
+        // transition IS the success feedback — no toast, it would pop over
+        // the brand moment.
         playTransition();
-        toast.success('Welcome back!');
         router.replace(ROUTES.dashboard.root);
       }
     } catch (err) {
