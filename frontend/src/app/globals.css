@@ -85,6 +85,23 @@
   }
 }
 
+@layer components {
+  /**
+   * Faint blueprint grid used behind the auth pages. Drawn from the `--border`
+   * token, so it re-tints itself in light/dark with no extra rules. The radial
+   * mask fades it out toward the edges so it reads as texture rather than graph
+   * paper, and keeps contrast clean directly behind the card.
+   */
+  .auth-grid {
+    background-image:
+      linear-gradient(to right, hsl(var(--border)) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--border)) 1px, transparent 1px);
+    background-size: 48px 48px;
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, #000 20%, transparent 75%);
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, #000 20%, transparent 75%);
+  }
+}
+
 @layer base {
   * {
     @apply border-border;
