@@ -1,6 +1,7 @@
 'use client';
 
 import { FolderTree, Package, FileText, Boxes } from 'lucide-react';
+import { Rise } from '@/components/shared/rise';
 import { StatCard } from './stat-card';
 import { useDashboardSummary } from '../hooks/use-dashboard-summary';
 import { usePermissions } from '@/hooks/use-permissions';
@@ -61,8 +62,10 @@ export function StatsCards() {
   return (
     <div className="space-y-2">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {cards.map((card) => (
-          <StatCard key={card.title} {...card} isLoading={isLoading} />
+        {cards.map((card, i) => (
+          <Rise key={card.title} index={i + 1}>
+            <StatCard {...card} isLoading={isLoading} />
+          </Rise>
         ))}
       </div>
       {isError && (

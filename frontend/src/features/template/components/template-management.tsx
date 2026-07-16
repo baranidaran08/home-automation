@@ -8,6 +8,7 @@ import { TemplateFormDialog } from './template-form-dialog';
 import { ViewTemplateDialog } from './view-template-dialog';
 import { TablePagination } from '@/components/shared/table-pagination';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
+import { Rise } from '@/components/shared/rise';
 import { useTemplates } from '../hooks/use-templates';
 import { useTemplateMutations } from '../hooks/use-template-mutations';
 import type { Template } from '@/types/template';
@@ -79,36 +80,42 @@ export function TemplateManagement() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
-      <div>
+      <Rise index={0}>
         <h1 className="text-3xl font-bold tracking-tight">Templates</h1>
         <p className="text-sm text-muted-foreground">
           Word (.docx) quotation templates — one per category. Used to generate quotations later.
         </p>
-      </div>
+      </Rise>
 
-      <TemplateToolbar
-        search={searchInput}
-        onSearchChange={setSearchInput}
-        category={category}
-        onCategoryChange={(v) => setFilter('category', v)}
-        onAdd={handleAdd}
-      />
+      <Rise index={1}>
+        <TemplateToolbar
+          search={searchInput}
+          onSearchChange={setSearchInput}
+          category={category}
+          onCategoryChange={(v) => setFilter('category', v)}
+          onAdd={handleAdd}
+        />
+      </Rise>
 
-      <TemplateTable
-        templates={templates}
-        isLoading={isLoading}
-        onView={handleView}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      <Rise index={2}>
+        <TemplateTable
+          templates={templates}
+          isLoading={isLoading}
+          onView={handleView}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      </Rise>
 
-      <TablePagination
-        page={meta.page}
-        totalPages={meta.totalPages}
-        total={meta.total}
-        onPageChange={setPage}
-        isFetching={isFetching}
-      />
+      <Rise index={3}>
+        <TablePagination
+          page={meta.page}
+          totalPages={meta.totalPages}
+          total={meta.total}
+          onPageChange={setPage}
+          isFetching={isFetching}
+        />
+      </Rise>
 
       <TemplateFormDialog open={formOpen} onOpenChange={setFormOpen} template={editing} />
       <ViewTemplateDialog open={viewOpen} onOpenChange={setViewOpen} template={viewing} />

@@ -8,6 +8,7 @@ import { RoleFormDialog } from './role-form-dialog';
 import { ViewRoleDialog } from './view-role-dialog';
 import { TablePagination } from '@/components/shared/table-pagination';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
+import { Rise } from '@/components/shared/rise';
 import { useRoles } from '../hooks/use-roles';
 import { useRoleMutations } from '../hooks/use-role-mutations';
 import type { Role } from '@/types/rbac';
@@ -80,30 +81,36 @@ export function RoleManagement() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
-      <div>
+      <Rise index={0}>
         <h1 className="text-3xl font-bold tracking-tight">Roles</h1>
         <p className="text-sm text-muted-foreground">
           Define roles and the exact actions each one can perform across the system.
         </p>
-      </div>
+      </Rise>
 
-      <RoleToolbar search={searchInput} onSearchChange={setSearchInput} onAdd={handleAdd} />
+      <Rise index={1}>
+        <RoleToolbar search={searchInput} onSearchChange={setSearchInput} onAdd={handleAdd} />
+      </Rise>
 
-      <RoleTable
-        roles={roles}
-        isLoading={isLoading}
-        onView={handleView}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      <Rise index={2}>
+        <RoleTable
+          roles={roles}
+          isLoading={isLoading}
+          onView={handleView}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      </Rise>
 
-      <TablePagination
-        page={meta.page}
-        totalPages={meta.totalPages}
-        total={meta.total}
-        onPageChange={setPage}
-        isFetching={isFetching}
-      />
+      <Rise index={3}>
+        <TablePagination
+          page={meta.page}
+          totalPages={meta.totalPages}
+          total={meta.total}
+          onPageChange={setPage}
+          isFetching={isFetching}
+        />
+      </Rise>
 
       <RoleFormDialog open={formOpen} onOpenChange={setFormOpen} role={editing} />
       <ViewRoleDialog open={viewOpen} onOpenChange={setViewOpen} role={viewing} />

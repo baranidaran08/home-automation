@@ -8,6 +8,7 @@ import { CategoryFormDialog } from './category-form-dialog';
 import { ViewCategoryDialog } from './view-category-dialog';
 import { TablePagination } from '@/components/shared/table-pagination';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
+import { Rise } from '@/components/shared/rise';
 import { useCategories } from '../hooks/use-categories';
 import { useCategoryMutations } from '../hooks/use-category-mutations';
 import type { Category } from '@/types/category';
@@ -80,30 +81,36 @@ export function CategoryManagement() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
-      <div>
+      <Rise index={0}>
         <h1 className="text-3xl font-bold tracking-tight">Categories</h1>
         <p className="text-sm text-muted-foreground">
           Manage home automation fields. Products and templates will belong to these categories.
         </p>
-      </div>
+      </Rise>
 
-      <CategoryToolbar search={searchInput} onSearchChange={setSearchInput} onAdd={handleAdd} />
+      <Rise index={1}>
+        <CategoryToolbar search={searchInput} onSearchChange={setSearchInput} onAdd={handleAdd} />
+      </Rise>
 
-      <CategoryTable
-        categories={categories}
-        isLoading={isLoading}
-        onView={handleView}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      <Rise index={2}>
+        <CategoryTable
+          categories={categories}
+          isLoading={isLoading}
+          onView={handleView}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      </Rise>
 
-      <TablePagination
-        page={meta.page}
-        totalPages={meta.totalPages}
-        total={meta.total}
-        onPageChange={setPage}
-        isFetching={isFetching}
-      />
+      <Rise index={3}>
+        <TablePagination
+          page={meta.page}
+          totalPages={meta.totalPages}
+          total={meta.total}
+          onPageChange={setPage}
+          isFetching={isFetching}
+        />
+      </Rise>
 
       <CategoryFormDialog open={formOpen} onOpenChange={setFormOpen} category={editing} />
       <ViewCategoryDialog open={viewOpen} onOpenChange={setViewOpen} category={viewing} />

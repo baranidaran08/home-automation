@@ -8,6 +8,7 @@ import { UserFormDialog } from './user-form-dialog';
 import { ViewUserDialog } from './view-user-dialog';
 import { TablePagination } from '@/components/shared/table-pagination';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
+import { Rise } from '@/components/shared/rise';
 import { useUsers } from '../hooks/use-users';
 import { useUserMutations } from '../hooks/use-user-mutations';
 import type { User } from '@/types/rbac';
@@ -80,30 +81,36 @@ export function UserManagement() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
-      <div>
+      <Rise index={0}>
         <h1 className="text-3xl font-bold tracking-tight">Users</h1>
         <p className="text-sm text-muted-foreground">
           Manage accounts and assign each user a role that defines what they can do.
         </p>
-      </div>
+      </Rise>
 
-      <UserToolbar search={searchInput} onSearchChange={setSearchInput} onAdd={handleAdd} />
+      <Rise index={1}>
+        <UserToolbar search={searchInput} onSearchChange={setSearchInput} onAdd={handleAdd} />
+      </Rise>
 
-      <UserTable
-        users={users}
-        isLoading={isLoading}
-        onView={handleView}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      <Rise index={2}>
+        <UserTable
+          users={users}
+          isLoading={isLoading}
+          onView={handleView}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      </Rise>
 
-      <TablePagination
-        page={meta.page}
-        totalPages={meta.totalPages}
-        total={meta.total}
-        onPageChange={setPage}
-        isFetching={isFetching}
-      />
+      <Rise index={3}>
+        <TablePagination
+          page={meta.page}
+          totalPages={meta.totalPages}
+          total={meta.total}
+          onPageChange={setPage}
+          isFetching={isFetching}
+        />
+      </Rise>
 
       <UserFormDialog open={formOpen} onOpenChange={setFormOpen} user={editing} />
       <ViewUserDialog open={viewOpen} onOpenChange={setViewOpen} user={viewing} />

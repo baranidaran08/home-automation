@@ -8,6 +8,7 @@ import { ProductFormDialog } from './product-form-dialog';
 import { ViewProductDialog } from './view-product-dialog';
 import { TablePagination } from '@/components/shared/table-pagination';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
+import { Rise } from '@/components/shared/rise';
 import { useProducts } from '../hooks/use-products';
 import { useProductMutations } from '../hooks/use-product-mutations';
 import type { Product, ProductStatus } from '@/types/product';
@@ -100,37 +101,43 @@ export function ProductManagement() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
-      <div>
+      <Rise index={0}>
         <h1 className="text-3xl font-bold tracking-tight">Products</h1>
         <p className="text-sm text-muted-foreground">
           Manage inventory. Each product belongs to one category.
         </p>
-      </div>
+      </Rise>
 
-      <ProductToolbar
-        filters={toolbarFilters}
-        onSearchChange={setSearchInput}
-        onCategoryChange={(v) => setFilter('category', v)}
-        onBrandChange={(v) => setFilter('brand', v)}
-        onStatusChange={(v) => setFilter('status', v)}
-        onAdd={handleAdd}
-      />
+      <Rise index={1}>
+        <ProductToolbar
+          filters={toolbarFilters}
+          onSearchChange={setSearchInput}
+          onCategoryChange={(v) => setFilter('category', v)}
+          onBrandChange={(v) => setFilter('brand', v)}
+          onStatusChange={(v) => setFilter('status', v)}
+          onAdd={handleAdd}
+        />
+      </Rise>
 
-      <ProductGrid
-        products={products}
-        isLoading={isLoading}
-        onView={handleView}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      <Rise index={2}>
+        <ProductGrid
+          products={products}
+          isLoading={isLoading}
+          onView={handleView}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      </Rise>
 
-      <TablePagination
-        page={meta.page}
-        totalPages={meta.totalPages}
-        total={meta.total}
-        onPageChange={setPage}
-        isFetching={isFetching}
-      />
+      <Rise index={3}>
+        <TablePagination
+          page={meta.page}
+          totalPages={meta.totalPages}
+          total={meta.total}
+          onPageChange={setPage}
+          isFetching={isFetching}
+        />
+      </Rise>
 
       <ProductFormDialog open={formOpen} onOpenChange={setFormOpen} product={editing} />
       <ViewProductDialog open={viewOpen} onOpenChange={setViewOpen} product={viewing} />

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { StatsCards, QuickActions, RecentQuotations } from '@/features/dashboard';
+import { Rise } from '@/components/shared/rise';
 
 export const metadata: Metadata = {
   title: 'Dashboard',
@@ -17,20 +18,21 @@ export const metadata: Metadata = {
 export default function DashboardPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-6">
-      <div>
+      <Rise index={0}>
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
         <p className="text-sm text-muted-foreground">Overview of your home automation system.</p>
-      </div>
+      </Rise>
 
+      {/* Stat cards stagger themselves at indexes 1-4. */}
       <StatsCards />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+        <Rise index={3} className="lg:col-span-2">
           <RecentQuotations />
-        </div>
-        <div className="lg:col-span-1">
+        </Rise>
+        <Rise index={4} className="lg:col-span-1">
           <QuickActions />
-        </div>
+        </Rise>
       </div>
     </div>
   );

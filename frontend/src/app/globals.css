@@ -164,6 +164,39 @@
     radial-gradient(hsl(var(--foreground) / 0.1) 1px, transparent 1px);
 }
 
+/* ==========================================================================
+   Page entrance — one-shot fade + rise, staggered by --rise-index.
+
+   Deliberately ONE-SHOT: it plays when content mounts (i.e. on navigation)
+   and never again. Perpetual/ambient motion is reserved for the login; inside
+   the app, things move once to establish order, then hold still.
+
+   `both` matters: it applies the keyframe's `from` state during the stagger
+   delay, so later items are invisible while they wait instead of flashing in
+   and re-animating.
+   ========================================================================== */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.anim-rise {
+  animation: rise-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--rise-index, 0) * 70ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-rise {
+    animation: none;
+  }
+}
+
 @layer utilities {
   /* Idle motion. Kept as CSS keyframes rather than JS loops: the compositor
      drives them on the GPU with no per-frame React work. All are transform/
