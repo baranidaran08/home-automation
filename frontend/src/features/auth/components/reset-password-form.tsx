@@ -5,18 +5,15 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft, Eye, EyeOff, Loader2, TriangleAlert } from 'lucide-react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { ArrowLeft, Eye, EyeOff, TriangleAlert } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { ROUTES } from '@/constants/routes';
+import { XenField } from './xen-field';
+import { XenButton } from './xen-button';
 import { useResetPasswordMutation } from '../hooks/use-reset-password-mutation';
-import {
-  resetPasswordSchema,
-  type ResetPasswordFormValues,
-} from '../schemas/reset-password.schema';
+import { resetPasswordSchema, type ResetPasswordFormValues } from '../schemas/reset-password.schema';
 import type { NormalizedApiError } from '@/lib/axios';
 
 interface ResetPasswordFormProps {
@@ -34,6 +31,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   const reset = useResetPasswordMutation();
   const [visible, setVisible] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const reduce = useReducedMotion();
 
   const {
     register,
@@ -47,19 +45,31 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   // No token in the URL → the link is malformed; don't even show the form.
   if (!token) {
     return (
-      <div className="space-y-4 text-center">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+      <div className="space-y-5 text-center">
+        <div
+          className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-destructive/10 text-destructive"
+          style={{ boxShadow: `0 0 40px hsl(var(--destructive) / 0.25)` }}
+        >
           <TriangleAlert className="h-6 w-6" aria-hidden />
         </div>
-        <div className="space-y-1">
-          <p className="text-sm font-medium">Invalid reset link</p>
-          <p className="text-sm text-muted-foreground">
+        <div className="space-y-1.5">
+          <p className="text-sm font-semibold" style={{ color: `hsl(var(--xen-ink))` }}>
+            Invalid reset link
+          </p>
+          <p className="text-sm" style={{ color: `hsl(var(--xen-muted))` }}>
             This password reset link is missing or malformed. Please request a new one.
           </p>
         </div>
-        <Button asChild className="w-full">
-          <Link href={ROUTES.auth.forgotPassword}>Request a new link</Link>
-        </Button>
+        <Link
+          href={ROUTES.auth.forgotPassword}
+          className="flex h-14 w-full items-center justify-center rounded-2xl text-[15px] font-semibold text-white"
+          style={{
+            background: `linear-gradient(135deg, hsl(var(--xen-accent)), hsl(var(--xen-accent-soft)))`,
+            boxShadow: `0 10px 30px -8px hsl(var(--xen-glow) / 0.6)`,
+          }}
+        >
+          Request a new link
+        </Link>
       </div>
     );
   }
@@ -72,79 +82,89 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       router.replace(ROUTES.auth.login);
     } catch (err) {
       const message =
-        (err as NormalizedApiError)?.message ??
-        'Could not reset your password. Please try again.';
+        (err as NormalizedApiError)?.message ?? 'Could not reset your password. Please try again.';
       setFormError(message);
       toast.error(message);
     }
   };
 
+  const enter = (i: number) =>
+    reduce
+      ? {}
+      : {
+          initial: { opacity: 0, y: 12 },
+          animate: { opacity: 1, y: 0 },
+          transition: { delay: 1.75 + i * 0.09, duration: 0.5, ease: [0.16, 1, 0.3, 1] as const },
+        };
+
+  const toggle = (
+    <button
+      type="button"
+      onClick={() => setVisible((v) => !v)}
+      className="grid h-9 w-9 place-items-center rounded-xl text-[hsl(var(--xen-muted))] transition-colors hover:bg-[hsl(var(--xen-accent)/0.1)] hover:text-[hsl(var(--xen-accent))]"
+      aria-label={visible ? 'Hide passwords' : 'Show passwords'}
+      tabIndex={-1}
+    >
+      {visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+    </button>
+  );
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
       {formError && (
-        <div
+        <motion.div
           role="alert"
-          className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+          initial={reduce ? false : { opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-2xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive"
         >
           {formError}
-        </div>
+        </motion.div>
       )}
 
-      <div className="space-y-2">
-        <Label htmlFor="newPassword">New Password</Label>
-        <div className="relative">
-          <Input
-            id="newPassword"
-            type={visible ? 'text' : 'password'}
-            autoComplete="new-password"
-            placeholder="At least 8 characters"
-            className="pr-10"
-            aria-invalid={!!errors.newPassword}
-            disabled={isSubmitting}
-            {...register('newPassword')}
-          />
-          <button
-            type="button"
-            onClick={() => setVisible((v) => !v)}
-            className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground transition-colors hover:text-foreground"
-            aria-label={visible ? 'Hide passwords' : 'Show passwords'}
-            tabIndex={-1}
-          >
-            {visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          </button>
-        </div>
-        {errors.newPassword && (
-          <p className="text-sm text-destructive">{errors.newPassword.message}</p>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="confirmPassword">Confirm Password</Label>
-        <Input
-          id="confirmPassword"
+      <motion.div {...enter(0)}>
+        <XenField
+          label="New Password"
           type={visible ? 'text' : 'password'}
           autoComplete="new-password"
-          placeholder="Re-enter your new password"
-          aria-invalid={!!errors.confirmPassword}
+          invalid={!!errors.newPassword}
+          disabled={isSubmitting}
+          trailing={toggle}
+          {...register('newPassword')}
+        />
+        {errors.newPassword && (
+          <p className="mt-1.5 pl-1 text-xs text-destructive">{errors.newPassword.message}</p>
+        )}
+      </motion.div>
+
+      <motion.div {...enter(1)}>
+        <XenField
+          label="Confirm Password"
+          type={visible ? 'text' : 'password'}
+          autoComplete="new-password"
+          invalid={!!errors.confirmPassword}
           disabled={isSubmitting}
           {...register('confirmPassword')}
         />
         {errors.confirmPassword && (
-          <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
+          <p className="mt-1.5 pl-1 text-xs text-destructive">{errors.confirmPassword.message}</p>
         )}
-      </div>
+      </motion.div>
 
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
-        {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
-        {isSubmitting ? 'Resetting…' : 'Reset Password'}
-      </Button>
+      <motion.div {...enter(2)} className="space-y-3 pt-1">
+        <XenButton type="submit" loading={isSubmitting} loadingText="Resetting…">
+          Reset Password
+        </XenButton>
 
-      <Button asChild variant="ghost" className="w-full">
-        <Link href={ROUTES.auth.login}>
-          <ArrowLeft className="h-4 w-4" />
+        <Link
+          href={ROUTES.auth.login}
+          className="group flex items-center justify-center gap-1.5 text-sm font-medium"
+          style={{ color: `hsl(var(--xen-muted))` }}
+        >
+          <ArrowLeft className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-x-0.5" />
           Back to sign in
         </Link>
-      </Button>
+      </motion.div>
     </form>
   );
 }

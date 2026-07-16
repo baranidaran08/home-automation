@@ -8,12 +8,22 @@ import { DashboardTopbar } from './dashboard-topbar';
  * App shell for the authenticated area: responsive sidebar + sticky topbar with
  * the page content offset to the right of the desktop rail. Owns the mobile
  * drawer open/close state shared between the topbar trigger and the sidebar.
+ *
+ * Every authenticated page shares the canvas texture rendered here, so the
+ * dashboard and the module pages sit on the same surface.
  */
 export function DashboardShell({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background">
+    // `isolate` makes this the stacking context the texture layer resolves
+    // against: without it the -z-10 layer escapes to the root context and is
+    // painted over by this element's own background.
+    <div className="relative isolate min-h-screen bg-background">
+      {/* Fixed rather than absolute so the fade is measured against the viewport
+          and stays consistent regardless of how long the page's content is. */}
+      <div aria-hidden className="dashboard-canvas pointer-events-none fixed inset-0 -z-10" />
+
       <DashboardSidebar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
 
       {/* Offset for the floating desktop rail (w-64 + left-4 inset + gutter). */}

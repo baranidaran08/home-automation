@@ -85,20 +85,161 @@
   }
 }
 
-@layer components {
-  /**
-   * Faint blueprint grid used behind the auth pages. Drawn from the `--border`
-   * token, so it re-tints itself in light/dark with no extra rules. The radial
-   * mask fades it out toward the edges so it reads as texture rather than graph
-   * paper, and keeps contrast clean directly behind the card.
-   */
-  .auth-grid {
-    background-image:
-      linear-gradient(to right, hsl(var(--border)) 1px, transparent 1px),
-      linear-gradient(to bottom, hsl(var(--border)) 1px, transparent 1px);
-    background-size: 48px 48px;
-    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, #000 20%, transparent 75%);
-    mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, #000 20%, transparent 75%);
+/* ==========================================================================
+   XEN login experience — scoped design system.
+
+   These tokens live under `.xen-auth` ONLY. The login screen keeps its own
+   canvas (warm-white / near-black) but shares the dashboard's indigo brand, so
+   signing in doesn't hand you off to a different-coloured product. Scoping
+   keeps the canvas and illustration tokens from leaking out of the login.
+   ========================================================================== */
+.xen-auth {
+  --xen-bg: 60 17% 98%; /* #FAFAF8 warm white */
+  --xen-card: 0 0% 100%; /* pure white */
+  --xen-ink: 243 30% 12%;
+  --xen-muted: 243 8% 46%;
+  --xen-line: 243 20% 90%;
+  --xen-accent: 243 75% 59%; /* #4F46E5 — same indigo as the dashboard --primary */
+  --xen-accent-soft: 243 75% 74%;
+  /* Illustration: white ceramic + frosted glass */
+  --xen-shell-a: 0 0% 100%;
+  --xen-shell-b: 243 30% 93%;
+  --xen-glow: 243 75% 59%;
+  --xen-glow-strength: 0.22;
+}
+
+.dark .xen-auth {
+  --xen-bg: 240 48% 5%; /* #07070F */
+  --xen-card: 240 38% 11%; /* #121228 */
+  --xen-ink: 243 30% 96%;
+  --xen-muted: 243 15% 65%;
+  --xen-line: 243 25% 22%;
+  /* Lifted + desaturated for dark, mirroring how the dashboard handles its own
+     indigo at night — the light-mode #4F46E5 optically vibrates on black. */
+  --xen-accent: 244 70% 72%;
+  --xen-accent-soft: 244 70% 82%;
+  /* Illustration: matte black shell with indigo reflections */
+  --xen-shell-a: 243 25% 16%;
+  --xen-shell-b: 243 40% 7%;
+  --xen-glow: 244 75% 68%;
+  --xen-glow-strength: 0.5;
+}
+
+/* ==========================================================================
+   Dashboard canvas texture — a faint dot matrix plus a brand wash at the top.
+
+   Purpose is depth, not decoration: white cards on a near-white canvas have
+   nothing to sit above, which is what makes them read flat. Giving the page a
+   texture lets the cards float without touching the cards themselves.
+
+   Deliberately STATIC. This sits behind data people read all day; ambient
+   motion belongs on the login, which is a five-second moment.
+
+   Both layers are token-driven, so they invert correctly in dark mode — the
+   dots are `--foreground` (near-black on light, near-white on dark) and the
+   wash is `--primary`.
+   ========================================================================== */
+.dashboard-canvas {
+  background-image:
+    radial-gradient(circle at 50% 0%, hsl(var(--primary) / 0.1), transparent 55%),
+    radial-gradient(hsl(var(--foreground) / 0.07) 1px, transparent 1px);
+  background-size:
+    100% 30rem,
+    22px 22px;
+  background-position:
+    50% 0,
+    0 0;
+  background-repeat: no-repeat, repeat;
+  /* Fade the texture down the viewport. Dots behind a dense table read as
+     noise, so the canvas is strongest up top and gone by the fold. */
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 45%, transparent 95%);
+  mask-image: linear-gradient(to bottom, black 0%, black 45%, transparent 95%);
+}
+
+/* Dark needs more alpha on both layers: the same values that read as a subtle
+   grey on #F8F9FC disappear entirely against #0B0D13. */
+.dark .dashboard-canvas {
+  background-image:
+    radial-gradient(circle at 50% 0%, hsl(var(--primary) / 0.14), transparent 55%),
+    radial-gradient(hsl(var(--foreground) / 0.1) 1px, transparent 1px);
+}
+
+@layer utilities {
+  /* Idle motion. Kept as CSS keyframes rather than JS loops: the compositor
+     drives them on the GPU with no per-frame React work. All are transform/
+     opacity only, so they never trigger layout or paint. */
+  @keyframes xen-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes xen-spin-reverse {
+    to {
+      transform: rotate(-360deg);
+    }
+  }
+  @keyframes xen-pulse {
+    0%,
+    100% {
+      opacity: 0.55;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.06);
+    }
+  }
+  @keyframes xen-float {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0);
+    }
+    50% {
+      transform: translate3d(0, -10px, 0);
+    }
+  }
+  @keyframes xen-drift {
+    0% {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    33% {
+      transform: translate3d(3%, -4%, 0) scale(1.08);
+    }
+    66% {
+      transform: translate3d(-3%, 3%, 0) scale(0.96);
+    }
+    100% {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+  }
+
+  .xen-anim-spin {
+    animation: xen-spin var(--xen-dur, 40s) linear infinite;
+  }
+  .xen-anim-spin-reverse {
+    animation: xen-spin-reverse var(--xen-dur, 55s) linear infinite;
+  }
+  .xen-anim-pulse {
+    animation: xen-pulse var(--xen-dur, 4s) ease-in-out infinite;
+  }
+  .xen-anim-float {
+    animation: xen-float var(--xen-dur, 6s) ease-in-out infinite;
+  }
+  .xen-anim-drift {
+    animation: xen-drift var(--xen-dur, 22s) ease-in-out infinite;
+  }
+
+  /* Accessibility: users who ask for less motion get the composed scene with no
+     perpetual movement. Framer's entrance animations are disabled separately via
+     `useReducedMotion()`. */
+  @media (prefers-reduced-motion: reduce) {
+    .xen-anim-spin,
+    .xen-anim-spin-reverse,
+    .xen-anim-pulse,
+    .xen-anim-float,
+    .xen-anim-drift {
+      animation: none !important;
+    }
   }
 }
 

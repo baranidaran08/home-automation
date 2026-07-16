@@ -3,6 +3,9 @@
 import { FolderTree, Package, FileText, Boxes } from 'lucide-react';
 import { StatCard } from './stat-card';
 import { useDashboardSummary } from '../hooks/use-dashboard-summary';
+import { usePermissions } from '@/hooks/use-permissions';
+import { MODULES, ACTIONS, type ModuleName } from '@/constants/permissions';
+import { ROUTES } from '@/constants/routes';
 import type { DashboardSummary } from '@/types/dashboard';
 
 const EMPTY_SUMMARY: DashboardSummary = {
@@ -14,37 +17,44 @@ const EMPTY_SUMMARY: DashboardSummary = {
 
 /**
  * The four overview metrics. Owns the data fetch (via the hook) and maps it to
- * reusable StatCard components. Falls back to zeros on error so the grid always
- * renders.
+ * reusable StatCards. Falls back to zeros on error so the grid always renders.
+ *
+ * Each card links to the module it counts, but only when the user can read that
+ * module — otherwise it renders as a plain card. Stock has no module of its own;
+ * it is a roll-up of product stock, so it points at Products.
  */
 export function StatsCards() {
   const { data, isLoading, isError } = useDashboardSummary();
+  const { can } = usePermissions();
   const summary = data ?? EMPTY_SUMMARY;
+
+  const linkIfAllowed = (module: ModuleName, href: string) =>
+    can(module, ACTIONS.READ) ? href : undefined;
 
   const cards = [
     {
       title: 'Total Categories',
       value: summary.totalCategories,
       icon: FolderTree,
-      accentClassName: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+      href: linkIfAllowed(MODULES.CATEGORIES, ROUTES.dashboard.categories),
     },
     {
       title: 'Total Products',
       value: summary.totalProducts,
       icon: Package,
-      accentClassName: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+      href: linkIfAllowed(MODULES.PRODUCTS, ROUTES.dashboard.products),
     },
     {
       title: 'Total Templates',
       value: summary.totalTemplates,
       icon: FileText,
-      accentClassName: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',
+      href: linkIfAllowed(MODULES.TEMPLATES, ROUTES.dashboard.templates),
     },
     {
       title: 'Total Stock',
       value: summary.totalStock,
       icon: Boxes,
-      accentClassName: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+      href: linkIfAllowed(MODULES.PRODUCTS, ROUTES.dashboard.products),
     },
   ];
 

@@ -1,8 +1,8 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
-import { Loader2, ShieldCheck } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loader2 } from 'lucide-react';
 import { ResetPasswordTokenReader } from '@/features/auth';
+import { XenAuthPanel } from '@/features/auth/components/xen-auth-panel';
 
 export const metadata: Metadata = {
   title: 'Reset password',
@@ -17,27 +17,19 @@ export const metadata: Metadata = {
  */
 export default function ResetPasswordPage() {
   return (
-    <Card className="w-full shadow-lg">
-      <CardHeader className="space-y-3 text-center">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-          <ShieldCheck className="h-7 w-7" aria-hidden />
-        </div>
-        <div className="space-y-1">
-          <CardTitle className="text-xl">Set a new password</CardTitle>
-          <CardDescription>Choose a strong password you haven&apos;t used before.</CardDescription>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <Suspense
-          fallback={
-            <div className="flex justify-center py-6 text-muted-foreground">
-              <Loader2 className="h-5 w-5 animate-spin" />
-            </div>
-          }
-        >
-          <ResetPasswordTokenReader />
-        </Suspense>
-      </CardContent>
-    </Card>
+    <XenAuthPanel
+      title="Set a new password"
+      description="Choose a strong password you haven't used before."
+    >
+      <Suspense
+        fallback={
+          <div className="flex justify-center py-6 text-[hsl(var(--xen-muted))]">
+            <Loader2 className="h-5 w-5 animate-spin" />
+          </div>
+        }
+      >
+        <ResetPasswordTokenReader />
+      </Suspense>
+    </XenAuthPanel>
   );
 }

@@ -1,13 +1,18 @@
 import type { Metadata } from 'next';
-import { StatsCards, QuickActions, RecentActivity } from '@/features/dashboard';
+import { StatsCards, QuickActions, RecentQuotations } from '@/features/dashboard';
 
 export const metadata: Metadata = {
   title: 'Dashboard',
 };
 
 /**
- * Admin dashboard home. Composes the overview stat cards, quick actions and
- * recent activity. Data fetching lives inside the feature components/hooks.
+ * Admin dashboard home. Composes the overview stat cards, recent quotations and
+ * quick actions. Data fetching lives inside the feature components/hooks.
+ *
+ * Below the stats the page splits 2:1 — recent quotations is the content you
+ * came to read, quick actions is a rail beside it. Both children permission-gate
+ * themselves and can render nothing, which the grid absorbs: a lone survivor
+ * simply takes its own column rather than leaving a hole.
  */
 export default function DashboardPage() {
   return (
@@ -18,8 +23,15 @@ export default function DashboardPage() {
       </div>
 
       <StatsCards />
-      <QuickActions />
-      <RecentActivity />
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <RecentQuotations />
+        </div>
+        <div className="lg:col-span-1">
+          <QuickActions />
+        </div>
+      </div>
     </div>
   );
 }

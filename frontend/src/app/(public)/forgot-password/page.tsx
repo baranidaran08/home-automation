@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
-import { KeyRound } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ForgotPasswordForm } from '@/features/auth';
+import { XenAuthPanel } from '@/features/auth/components/xen-auth-panel';
 
 export const metadata: Metadata = {
   title: 'Forgot password',
@@ -14,21 +13,11 @@ export const metadata: Metadata = {
  */
 export default function ForgotPasswordPage() {
   return (
-    <Card className="w-full shadow-lg">
-      <CardHeader className="space-y-3 text-center">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-          <KeyRound className="h-7 w-7" aria-hidden />
-        </div>
-        <div className="space-y-1">
-          <CardTitle className="text-xl">Forgot your password?</CardTitle>
-          <CardDescription>
-            Enter your email and we&apos;ll send you a link to reset it.
-          </CardDescription>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <ForgotPasswordForm />
-      </CardContent>
-    </Card>
+    <XenAuthPanel
+      title="Forgot your password?"
+      description="Enter your email and we'll send you a link to reset it."
+    >
+      <ForgotPasswordForm />
+    </XenAuthPanel>
   );
 }
