@@ -10,6 +10,8 @@ import { ArrowLeft, Eye, EyeOff, TriangleAlert } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { ROUTES } from '@/constants/routes';
+import { useAuthStore } from '@/store/auth.store';
+import { useTransitionOverlayStore } from '@/store/transition.store';
 import { XenField } from './xen-field';
 import { XenButton } from './xen-button';
 import { useResetPasswordMutation } from '../hooks/use-reset-password-mutation';
@@ -29,6 +31,8 @@ interface ResetPasswordFormProps {
 export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   const router = useRouter();
   const reset = useResetPasswordMutation();
+  const isAuthenticated = useAuthStore((s) => s.status === 'authenticated');
+  const playTransition = useTransitionOverlayStore((s) => s.start);
   const [visible, setVisible] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const reduce = useReducedMotion();
@@ -78,7 +82,16 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     setFormError(null);
     try {
       await reset.mutateAsync({ token, newPassword: values.newPassword });
-      toast.success('Password reset successfully. Please sign in.');
+      // The redirect target is /login either way; where the user actually LANDS
+      // depends on their session. With a live session GuestGuard bounces them
+      // straight into the dashboard — cover that with the brand transition (no
+      // toast over it). Without one they really do land on the login form, so
+      // the "please sign in" toast is the feedback that matters.
+      if (isAuthenticated) {
+        playTransition();
+      } else {
+        toast.success('Password reset successfully. Please sign in.');
+      }
       router.replace(ROUTES.auth.login);
     } catch (err) {
       const message =

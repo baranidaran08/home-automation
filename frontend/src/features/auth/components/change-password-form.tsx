@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 
 import { authService } from '@/services/auth.service';
 import { useAuthStore } from '@/store/auth.store';
+import { useTransitionOverlayStore } from '@/store/transition.store';
 import { ROUTES } from '@/constants/routes';
 import { XenField } from './xen-field';
 import { XenButton } from './xen-button';
@@ -29,6 +30,7 @@ import type { NormalizedApiError } from '@/lib/axios';
 export function ChangePasswordForm() {
   const router = useRouter();
   const setAuthenticated = useAuthStore((s) => s.setAuthenticated);
+  const playTransition = useTransitionOverlayStore((s) => s.start);
   const [visible, setVisible] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const reduce = useReducedMotion();
@@ -49,8 +51,11 @@ export function ChangePasswordForm() {
         currentPassword: values.currentPassword,
         newPassword: values.newPassword,
       });
+      // Cover the entry into the app with the brand transition (same treatment
+      // as login — and like there, the transition IS the success feedback, so
+      // no toast popping over it).
+      playTransition();
       setAuthenticated(user); // lock lifted (mustChangePassword: false)
-      toast.success('Password changed successfully');
       router.replace(ROUTES.dashboard.root);
     } catch (err) {
       const message =
