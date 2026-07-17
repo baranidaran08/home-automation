@@ -56,3 +56,4 @@ const verifyGoogleIdToken = async (idToken) => {
 };
 
 module.exports = { verifyGoogleIdToken };
+

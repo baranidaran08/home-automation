@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from 'react';
 import { DashboardSidebar } from './dashboard-sidebar';
 import { DashboardTopbar } from './dashboard-topbar';
+import { Breadcrumb } from './breadcrumb';
 
 /**
  * App shell for the authenticated area: responsive sidebar + sticky topbar with
@@ -29,7 +30,15 @@ export function DashboardShell({ children }: { children: ReactNode }) {
       {/* Offset for the floating desktop rail (w-64 + left-4 inset + gutter). */}
       <div className="lg:pl-[18.5rem]">
         <DashboardTopbar onMenuClick={() => setMobileOpen(true)} />
-        <main className="px-4 pb-10 pt-2 sm:px-6 lg:pr-8">{children}</main>
+        <main className="px-4 pb-10 pt-2 sm:px-6 lg:pr-8">
+          {/* Global breadcrumb — rendered once here, above every page's title.
+              Wrapped in the same max-w-7xl container the pages use, so it aligns
+              flush with the page heading below it. */}
+          <div className="mx-auto mb-4 max-w-7xl">
+            <Breadcrumb />
+          </div>
+          {children}
+        </main>
       </div>
     </div>
   );
