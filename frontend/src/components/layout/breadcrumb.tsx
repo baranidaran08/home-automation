@@ -80,7 +80,9 @@ export function Breadcrumb({ className }: { className?: string }) {
   const overrideLabel = override?.path === pathname ? override.label : undefined;
 
   const crumbs = buildCrumbs(pathname, overrideLabel);
-  if (crumbs.length === 0) return null;
+  // Hide on a single-crumb trail (e.g. the dashboard root): one item is not a
+  // trail, has nothing to navigate to, and just duplicates the page title.
+  if (crumbs.length <= 1) return null;
 
   return (
     <nav aria-label="Breadcrumb" className={cn('min-w-0', className)}>

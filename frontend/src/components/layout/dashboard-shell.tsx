@@ -33,9 +33,11 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         <main className="px-4 pb-10 pt-2 sm:px-6 lg:pr-8">
           {/* Global breadcrumb — rendered once here, above every page's title.
               Wrapped in the same max-w-7xl container the pages use, so it aligns
-              flush with the page heading below it. */}
-          <div className="mx-auto mb-4 max-w-7xl">
-            <Breadcrumb />
+              flush with the page heading below it. The spacing lives on the
+              breadcrumb itself, so when it hides (single-crumb pages like the
+              dashboard root) it leaves no empty gap above the title. */}
+          <div className="mx-auto max-w-7xl">
+            <Breadcrumb className="mb-4" />
           </div>
           {children}
         </main>
