@@ -46,6 +46,15 @@ const strongPassword = z
   .regex(/[A-Z]/, 'Password must contain an uppercase letter')
   .regex(/[0-9]/, 'Password must contain a number');
 
+/** POST /auth/google — a single Google ID token (credential) from the frontend. */
+const googleLoginSchema = z.object({
+  body: z.object({
+    idToken: z
+      .string({ required_error: 'A Google credential is required' })
+      .min(1, 'A Google credential is required'),
+  }),
+});
+
 /** POST /auth/forgot-password — email only. */
 const forgotPasswordSchema = z.object({
   body: z.object({
@@ -67,4 +76,10 @@ const resetPasswordSchema = z.object({
   }),
 });
 
-module.exports = { loginSchema, changePasswordSchema, forgotPasswordSchema, resetPasswordSchema };
+module.exports = {
+  loginSchema,
+  googleLoginSchema,
+  changePasswordSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+};

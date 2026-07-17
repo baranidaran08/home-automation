@@ -32,6 +32,7 @@
     "docxtemplater": "^3.69.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "google-auth-library": "^10.9.0",
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
     "libreoffice-convert": "^1.8.2",

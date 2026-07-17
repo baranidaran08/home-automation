@@ -3,6 +3,7 @@ import type {
   AuthUser,
   AuthPayload,
   LoginCredentials,
+  GoogleLoginInput,
   ChangePasswordInput,
   ForgotPasswordInput,
   ResetPasswordInput,
@@ -16,6 +17,10 @@ import type {
 export const authService = {
   login: (credentials: LoginCredentials) =>
     httpService.post<AuthPayload, LoginCredentials>('/auth/login', credentials),
+
+  /** Authenticate a pre-invited user with a Google ID token (credential). */
+  googleLogin: (input: GoogleLoginInput) =>
+    httpService.post<AuthPayload, GoogleLoginInput>('/auth/google', input),
 
   logout: () => httpService.post<null>('/auth/logout'),
 

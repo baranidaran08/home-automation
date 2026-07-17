@@ -3,7 +3,11 @@
     "allow": [
       "Bash(node verify-auth.tmp.js)",
       "Bash(rm -f verify-auth.tmp.js)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(node -e ' *)",
+      "Bash(npx eslint *)",
+      "Bash(npx tsc *)"
     ]
   }
 }

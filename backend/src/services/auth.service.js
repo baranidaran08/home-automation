@@ -7,6 +7,8 @@ const { signAccessToken } = require('../utils/jwt');
 const { rolePermissionKeys, serializeAuthUser } = require('../utils/rbac');
 const { generateResetToken, hashResetToken } = require('../utils/reset-token');
 const { runInBackground } = require('../utils/background');
+const { verifyGoogleIdToken } = require('../utils/google');
+const { generateTemporaryPassword } = require('../utils/password');
 const emailService = require('./email.service');
 const env = require('../config/env');
 const { MESSAGES } = require('../constants');
@@ -40,22 +42,96 @@ const login = async ({ email, password }) => {
     throw ApiError.unauthorized(MESSAGES.INVALID_CREDENTIALS);
   }
 
+  // Method lock: a Google-activated account can never use email + password.
+  // Checked BEFORE the password comparison so the response is deterministic
+  // (a scrambled Google password would otherwise just yield INVALID_CREDENTIALS).
+  if (user.authMethod === 'GOOGLE') {
+    throw ApiError.forbidden(MESSAGES.ACCOUNT_USES_GOOGLE);
+  }
+
   const passwordMatches = await user.comparePassword(password);
   if (!passwordMatches) {
     throw ApiError.unauthorized(MESSAGES.INVALID_CREDENTIALS);
   }
 
-  const permissions = rolePermissionKeys(user.role);
-  const token = signAccessToken({
+  return { user: serializeAuthUser(user), token: issueToken(user) };
+};
+
+/**
+ * Sign the application's own access token for a user (role must be populated).
+ * Central so both the password and Google flows issue an identical JWT — the
+ * Google ID token is NEVER used for app authorization.
+ */
+const issueToken = (user) =>
+  signAccessToken({
     sub: user._id.toString(),
     email: user.email,
     role: user.role?.name,
     roleId: user.role?._id?.toString(),
     isSuperAdmin: !!user.role?.isSuperAdmin,
-    permissions,
+    permissions: rolePermissionKeys(user.role),
   });
 
-  return { user: serializeAuthUser(user), token };
+/**
+ * Authenticate via Google. The frontend sends a Google ID token; we verify it
+ * on the backend, then match it to a PRE-INVITED user by email. We never create
+ * an account from Google.
+ *
+ * Activation model (the permanent one-time choice):
+ *  - authMethod === 'LOCAL'  → refuse (this account is email + password only).
+ *  - authMethod === 'GOOGLE' → returning Google user; sign in.
+ *  - authMethod === null     → first activation via Google: lock to GOOGLE,
+ *                              store googleId, activate, and invalidate the
+ *                              temporary password so it can never be used.
+ *
+ * @returns {Promise<{ user: object, token: string }>}
+ */
+const loginWithGoogle = async ({ idToken }) => {
+  const profile = await verifyGoogleIdToken(idToken);
+
+  if (!profile.emailVerified) {
+    throw ApiError.unauthorized(MESSAGES.GOOGLE_EMAIL_UNVERIFIED);
+  }
+
+  // Match strictly by the verified Google email. Never create a user here.
+  const user = await User.findOne({ email: profile.email })
+    .select('+password +googleId')
+    .populate(ROLE_POPULATE);
+
+  if (!user) {
+    throw ApiError.unauthorized(MESSAGES.GOOGLE_EMAIL_MISMATCH);
+  }
+
+  // Method lock: a LOCAL-activated account can never use Google.
+  if (user.authMethod === 'LOCAL') {
+    throw ApiError.forbidden(MESSAGES.ACCOUNT_USES_LOCAL);
+  }
+
+  if (user.authMethod === 'GOOGLE') {
+    // Returning Google user. Guard against a mismatched subject (same email,
+    // different Google account) — practically impossible for a verified email,
+    // but we never silently rebind a locked account.
+    if (user.googleId && user.googleId !== profile.googleId) {
+      throw ApiError.unauthorized(MESSAGES.GOOGLE_EMAIL_MISMATCH);
+    }
+  } else {
+    // authMethod === null → first-time activation via Google.
+    user.googleId = profile.googleId;
+    user.authMethod = 'GOOGLE';
+    user.accountActivated = true;
+    user.mustChangePassword = false; // no password step for Google users
+    // Invalidate the temporary password: replace it with a fresh random secret
+    // the user will never know, re-hashed by the pre-save hook. Defence in depth
+    // on top of the authMethod lock.
+    user.password = generateTemporaryPassword(32);
+    // Clear any pending reset token — irrelevant for a Google account.
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+    logger.info(`[auth] Account activated via Google: ${user.email}`);
+  }
+
+  return { user: serializeAuthUser(user), token: issueToken(user) };
 };
 
 /**
@@ -99,6 +175,11 @@ const changePassword = async (userId, { currentPassword, newPassword }) => {
 
   user.password = newPassword; // re-hashed on save
   user.mustChangePassword = false; // first-login lock lifted
+  // Activation via the LOCAL path: lock the method the first time a user sets
+  // their own password. `|| 'LOCAL'` leaves an already-LOCAL account untouched
+  // and never overrides a GOOGLE account (which cannot reach change-password).
+  user.authMethod = user.authMethod || 'LOCAL';
+  user.accountActivated = true;
   await user.save();
 
   return serializeAuthUser(user);
@@ -182,6 +263,7 @@ const resetPassword = async ({ token, newPassword }) => {
 
 module.exports = {
   login,
+  loginWithGoogle,
   getUserById,
   changePassword,
   requestPasswordReset,

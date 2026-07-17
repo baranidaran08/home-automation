@@ -24,6 +24,19 @@ const MESSAGES = {
   CURRENT_PASSWORD_INVALID: 'The current password is incorrect',
   PASSWORD_SAME: 'New password must be different from the current password',
 
+  // Google OAuth / authentication-method locking
+  GOOGLE_LOGIN_SUCCESS: 'Signed in with Google successfully',
+  GOOGLE_TOKEN_MISSING: 'A Google credential is required',
+  GOOGLE_AUTH_FAILED: 'Google authentication failed. Please try again.',
+  GOOGLE_EMAIL_UNVERIFIED: 'Your Google email address is not verified.',
+  GOOGLE_NOT_CONFIGURED: 'Google Sign-In is not configured on the server.',
+  // Shown when a Google account's email does not match any invited user. We do
+  // NOT create accounts from Google — only pre-invited users may authenticate.
+  GOOGLE_EMAIL_MISMATCH: 'This Google account does not match the invited email address.',
+  // Method-lock rejections (the account already activated with the other method).
+  ACCOUNT_USES_LOCAL: 'This account uses Email & Password authentication.',
+  ACCOUNT_USES_GOOGLE: 'This account is linked with Google Sign-In.',
+
   // Forgot / reset password flow. The request message is intentionally generic so
   // it never reveals whether an email is registered (enumeration protection).
   PASSWORD_RESET_REQUESTED: 'If an account exists, a reset link has been sent.',

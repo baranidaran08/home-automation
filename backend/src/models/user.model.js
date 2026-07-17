@@ -33,6 +33,34 @@ const userSchema = new Schema(
       // Excluded from queries by default; `.select('+password')` when auth needs it.
       select: false,
     },
+    // Authentication method — the user's PERMANENT one-time choice, locked at
+    // activation. `null` means "invited, not yet activated": the user may still
+    // choose either method (whichever they use first wins). After activation it
+    // is 'LOCAL' (email + password) or 'GOOGLE' (Google Sign-In), and the other
+    // method is refused. Existing accounts are backfilled to 'LOCAL' by the
+    // seeder migration, so this only gates newly-invited users.
+    authMethod: {
+      type: String,
+      enum: ['LOCAL', 'GOOGLE'],
+      default: null,
+    },
+    // Google account subject (`sub`) — set when the user activates via Google.
+    // `sparse` so the unique index ignores the many null (LOCAL) users.
+    // `select: false`: an internal identifier, never serialised to the client.
+    googleId: {
+      type: String,
+      default: null,
+      unique: true,
+      sparse: true,
+      select: false,
+    },
+    // True once the user has completed activation via either method. Distinct
+    // from `mustChangePassword` (which is specific to the LOCAL temp-password
+    // mechanic): a Google user is activated without ever changing a password.
+    accountActivated: {
+      type: Boolean,
+      default: false,
+    },
     role: {
       type: Schema.Types.ObjectId,
       ref: 'Role',

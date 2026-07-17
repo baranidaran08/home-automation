@@ -25,6 +25,15 @@ export function useAuth() {
     [setAuthenticated]
   );
 
+  const googleLogin = useCallback(
+    async (idToken: string) => {
+      const { user: loggedInUser } = await authService.googleLogin({ idToken });
+      setAuthenticated(loggedInUser);
+      return loggedInUser;
+    },
+    [setAuthenticated]
+  );
+
   const logout = useCallback(async () => {
     try {
       await authService.logout();
@@ -35,5 +44,5 @@ export function useAuth() {
     }
   }, [router, setUnauthenticated]);
 
-  return { user, status, isAuthenticated, login, logout };
+  return { user, status, isAuthenticated, login, googleLogin, logout };
 }

@@ -2,6 +2,7 @@
 
 const logger = require('../utils/logger');
 const { seedUser } = require('./user.seeder');
+const { backfillAuthMethod } = require('./auth-method.migration');
 
 /**
  * Startup database seeder. Invoked from `server.js` AFTER the Mongo connection is
@@ -27,6 +28,9 @@ const seedDatabase = async () => {
   logger.info('[seed] Running database seeder...');
   // `seedUser` cascades: it seeds permissions, then roles, then the Super Admin.
   await seedUser();
+  // Lock pre-existing (already-activated) accounts to LOCAL so the new Google
+  // flow can't hijack them. Runs after the Root is seeded so it is covered too.
+  await backfillAuthMethod();
   logger.info('[seed] ✓ Database seeding completed.');
 };
 

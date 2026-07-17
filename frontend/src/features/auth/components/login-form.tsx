@@ -13,8 +13,11 @@ import { useAuth } from '../hooks/use-auth';
 import { useTransitionOverlayStore } from '@/store/transition.store';
 import { XenField } from './xen-field';
 import { XenButton } from './xen-button';
+import { GoogleSignInButton } from './google-sign-in-button';
 import { loginSchema, type LoginFormValues } from '../schemas/login.schema';
 import { ROUTES } from '@/constants/routes';
+import { env } from '@/constants/env';
+import type { AuthUser } from '@/types/auth';
 import type { NormalizedApiError } from '@/lib/axios';
 
 /**
@@ -40,24 +43,28 @@ export function LoginForm() {
     defaultValues: { email: '', password: '' },
   });
 
+  // Shared post-authentication path for BOTH email/password and Google sign-in.
+  // Google users are already activated, so they never hit the change-password
+  // branch — but the check is kept for the password temp-password case.
+  const handleAuthenticated = (user: AuthUser) => {
+    if (user.mustChangePassword) {
+      toast.success('Please set a new password to continue');
+      router.replace(ROUTES.changePassword);
+    } else {
+      // Cover the guard-driven navigation with the brand transition. Purely
+      // visual: auth state is already set and the redirect below (plus
+      // GuestGuard's own) proceed underneath it. The transition IS the success
+      // feedback — no toast, it would pop over the brand moment.
+      playTransition();
+      router.replace(ROUTES.dashboard.root);
+    }
+  };
+
   const onSubmit = async (values: LoginFormValues) => {
     setFormError(null);
     try {
       const user = await login(values);
-      // First-login users (temporary password) must set their own password before
-      // they can reach the dashboard.
-      if (user.mustChangePassword) {
-        toast.success('Please set a new password to continue');
-        router.replace(ROUTES.changePassword);
-      } else {
-        // Cover the guard-driven navigation with the brand transition. Purely
-        // visual: auth state is already set and the redirect below (plus
-        // GuestGuard's own) proceed underneath it, exactly as before. The
-        // transition IS the success feedback — no toast, it would pop over
-        // the brand moment.
-        playTransition();
-        router.replace(ROUTES.dashboard.root);
-      }
+      handleAuthenticated(user);
     } catch (err) {
       const message = (err as NormalizedApiError)?.message ?? 'Login failed. Please try again.';
       setFormError(message);
@@ -76,8 +83,9 @@ export function LoginForm() {
         };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
-      {formError && (
+    <div className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
+        {formError && (
         <motion.div
           role="alert"
           initial={reduce ? false : { opacity: 0, y: -6 }}
@@ -138,12 +146,29 @@ export function LoginForm() {
         </Link>
       </motion.div>
 
-      <motion.div {...item(3)}>
-        <XenButton type="submit" loading={isSubmitting} loadingText="Signing in…">
-          Sign in
-          <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-        </XenButton>
-      </motion.div>
-    </form>
+        <motion.div {...item(3)}>
+          <XenButton type="submit" loading={isSubmitting} loadingText="Signing in…">
+            Sign in
+            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+          </XenButton>
+        </motion.div>
+      </form>
+
+      {/* Divider + Google Sign-In. The button self-hides when Google isn't
+          configured, in which case the divider is hidden too. */}
+      {env.googleClientId && (
+        <>
+          <motion.div {...item(4)} className="flex items-center gap-3 py-1">
+            <span className="h-px flex-1 bg-[hsl(var(--xen-line))]" />
+            <span className="text-xs font-medium text-[hsl(var(--xen-muted))]">OR</span>
+            <span className="h-px flex-1 bg-[hsl(var(--xen-line))]" />
+          </motion.div>
+
+          <motion.div {...item(5)}>
+            <GoogleSignInButton onAuthenticated={handleAuthenticated} disabled={isSubmitting} />
+          </motion.div>
+        </>
+      )}
+    </div>
   );
 }

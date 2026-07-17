@@ -118,6 +118,14 @@ const env = {
   resetPassword: {
     expiresMinutes: parseInt(optional('RESET_PASSWORD_EXPIRES_MINUTES', '15'), 10),
   },
+
+  // Google OAuth 2.0 — used ONLY to verify the ID token during sign-in. The
+  // client id must match the frontend's NEXT_PUBLIC_GOOGLE_CLIENT_ID (it is the
+  // `audience` the ID token is checked against). No client secret is needed:
+  // we verify an ID token, we don't exchange an auth code.
+  google: {
+    clientId: optional('GOOGLE_CLIENT_ID', ''),
+  },
 };
 
 module.exports = env;

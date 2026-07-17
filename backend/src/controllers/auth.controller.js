@@ -20,6 +20,18 @@ const login = asyncHandler(async (req, res) => {
 });
 
 /**
+ * POST /api/auth/google
+ * Authenticates a pre-invited user via a Google ID token. The token is verified
+ * on the backend; on success the app issues its OWN JWT (as an httpOnly cookie)
+ * exactly like password login. Never creates a user.
+ */
+const googleLogin = asyncHandler(async (req, res) => {
+  const { user, token } = await authService.loginWithGoogle(req.body);
+  setAuthCookie(res, token);
+  return ApiResponse.ok(res, { user }, MESSAGES.GOOGLE_LOGIN_SUCCESS);
+});
+
+/**
  * POST /api/auth/logout
  * Clears the auth cookie. Safe to call whether or not a session exists.
  */
@@ -69,6 +81,7 @@ const resetPassword = asyncHandler(async (req, res) => {
 
 module.exports = {
   login,
+  googleLogin,
   logout,
   getCurrentUser,
   changePassword,
