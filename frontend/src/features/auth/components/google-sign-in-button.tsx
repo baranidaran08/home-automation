@@ -21,6 +21,13 @@ interface GoogleSignInButtonProps {
 // a percentage width — so we measure the container and pass an explicit pixel
 // width, re-measuring on resize to stay responsive.
 const GOOGLE_MAX_WIDTH = 400;
+// GSI's minimum. Below this the button renders unpredictably.
+const GOOGLE_MIN_WIDTH = 200;
+// Inset from the container edges. The PERSONALIZED button ("Continue as …")
+// places an avatar flush right; without this margin it sits on the card edge
+// and gets clipped. Keeping the button slightly narrower than the container
+// leaves room for the avatar and any border GSI adds.
+const EDGE_MARGIN = 16;
 
 /**
  * Google Sign-In using Google's official button (Google Identity Services),
@@ -39,11 +46,16 @@ export function GoogleSignInButton({ onAuthenticated, disabled }: GoogleSignInBu
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
 
-  // Track the container's width so the Google button fills it on every screen.
+  // Track the container's width so the Google button fits it on every screen.
+  // We size the button a little narrower than the container (EDGE_MARGIN) so the
+  // personalized button's right-hand avatar always sits inside the edge.
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    const measure = () => setWidth(Math.min(Math.round(el.clientWidth), GOOGLE_MAX_WIDTH));
+    const measure = () => {
+      const available = Math.round(el.clientWidth) - EDGE_MARGIN;
+      setWidth(Math.max(GOOGLE_MIN_WIDTH, Math.min(available, GOOGLE_MAX_WIDTH)));
+    };
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(el);
@@ -79,7 +91,7 @@ export function GoogleSignInButton({ onAuthenticated, disabled }: GoogleSignInBu
           (Google sizes the button on mount and doesn't reflow to `100%`). */}
       {width > 0 && (
         <div
-          className="flex justify-center overflow-hidden [color-scheme:light]"
+          className="flex justify-center [color-scheme:light]"
           style={disabled ? { pointerEvents: 'none', opacity: 0.6 } : undefined}
         >
           <GoogleLogin
