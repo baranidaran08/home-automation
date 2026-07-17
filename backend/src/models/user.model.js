@@ -45,11 +45,15 @@ const userSchema = new Schema(
       default: null,
     },
     // Google account subject (`sub`) — set when the user activates via Google.
-    // `sparse` so the unique index ignores the many null (LOCAL) users.
     // `select: false`: an internal identifier, never serialised to the client.
+    //
+    // NO `default: null` on purpose: a sparse unique index still indexes
+    // EXPLICIT nulls, so defaulting to null would make every LOCAL user collide
+    // on the index ("Duplicate value for: googleId"). Leaving the field absent
+    // keeps them out of the sparse index entirely; only real Google ids are
+    // enforced unique.
     googleId: {
       type: String,
-      default: null,
       unique: true,
       sparse: true,
       select: false,

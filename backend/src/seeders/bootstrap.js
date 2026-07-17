@@ -2,7 +2,7 @@
 
 const logger = require('../utils/logger');
 const { seedUser } = require('./user.seeder');
-const { backfillAuthMethod } = require('./auth-method.migration');
+const { backfillAuthMethod, cleanupNullGoogleIds } = require('./auth-method.migration');
 
 /**
  * Startup database seeder. Invoked from `server.js` AFTER the Mongo connection is
@@ -31,6 +31,9 @@ const seedDatabase = async () => {
   // Lock pre-existing (already-activated) accounts to LOCAL so the new Google
   // flow can't hijack them. Runs after the Root is seeded so it is covered too.
   await backfillAuthMethod();
+  // Remove explicit null googleId values (an earlier default) that collide on
+  // the sparse unique index — otherwise creating a second user 409s.
+  await cleanupNullGoogleIds();
   logger.info('[seed] ✓ Database seeding completed.');
 };
 

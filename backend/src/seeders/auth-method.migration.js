@@ -35,4 +35,21 @@ const backfillAuthMethod = async () => {
   }
 };
 
-module.exports = { backfillAuthMethod };
+/**
+ * Remove explicit `googleId: null` values written by an earlier version that
+ * defaulted the field to null. A sparse UNIQUE index still indexes explicit
+ * nulls, so more than one such user collides ("Duplicate value for: googleId").
+ * Unsetting the field takes those users out of the sparse index; real Google
+ * ids (strings) are never matched by `{ googleId: null }`, so they're untouched.
+ *
+ * Idempotent: once unset, the field no longer matches and this becomes a no-op.
+ */
+const cleanupNullGoogleIds = async () => {
+  const result = await User.updateMany({ googleId: null }, { $unset: { googleId: '' } });
+  const changed = result.modifiedCount ?? 0;
+  if (changed > 0) {
+    logger.info(`[seed] ✓ Cleared null googleId on ${changed} user(s).`);
+  }
+};
+
+module.exports = { backfillAuthMethod, cleanupNullGoogleIds };
