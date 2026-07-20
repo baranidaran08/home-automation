@@ -47,7 +47,12 @@ export function UserMenu() {
 
   return (
     <>
-      <DropdownMenu>
+      {/* `modal={false}`: a modal dropdown locks <body> pointer-events; when the
+          Logout item opens the confirm AlertDialog in the same tick, the dialog
+          captures that locked value as its "previous" and restores it on Cancel —
+          freezing the dashboard until refresh. Non-modal, the dropdown never
+          locks the body, so the dialog manages the lock cleanly on its own. */}
+      <DropdownMenu modal={false}>
         <DropdownMenuTrigger
           className="flex items-center gap-3 rounded-full outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:border sm:border-border/70 sm:bg-card sm:p-1 sm:pl-3 sm:shadow-soft sm:hover:bg-accent/40"
           aria-label="Open account menu"

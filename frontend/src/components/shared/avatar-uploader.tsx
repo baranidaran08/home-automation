@@ -106,8 +106,11 @@ export function AvatarUploader({
         className={cn('h-20 w-20 text-xl text-primary-foreground', className)}
       />
 
-      {/* Camera badge overlapping the bottom-right edge; opens the photo menu. */}
-      <DropdownMenu>
+      {/* Camera badge overlapping the bottom-right edge; opens the photo menu.
+          `modal={false}` so the menu never locks <body> pointer-events (it opens
+          the crop dialog / a native file picker — a modal menu can leave the
+          page frozen after those close). */}
+      <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <button
             type="button"
