@@ -147,7 +147,12 @@ const updateUser = async (id, updates, currentUserId) => {
   // Root Super Admin protection (backend is the source of truth).
   assertRootUpdateAllowed(user, updates, String(user._id) === String(currentUserId));
 
-  if (updates.email !== undefined && updates.email !== user.email) {
+  // Changing the email is a plain rename of the same account: the password is
+  // left completely untouched (only re-hashed when `updates.password` is given),
+  // so the user can immediately sign in with the NEW email + their EXISTING
+  // password. We deliberately do NOT trigger a reset email here.
+  const emailChanged = updates.email !== undefined && updates.email !== user.email;
+  if (emailChanged) {
     await assertEmailIsUnique(updates.email, user._id);
     user.email = updates.email;
   }
@@ -165,6 +170,23 @@ const updateUser = async (id, updates, currentUserId) => {
   if (updates.password !== undefined) user.password = updates.password; // re-hashed on save
 
   await user.save();
+
+  // Sever any recorded Google identity when the email changes. The stored
+  // `googleId` (the Google `sub`) was bound to the PREVIOUS email; keeping it
+  // would (a) leave a stale subject lingering on the sparse-unique index — a
+  // duplicate-key hazard if the old email is later reused by a new user signing
+  // in with that old Google account — and (b) is unnecessary, because
+  // `loginWithGoogle` matches strictly by email and re-records the subject on
+  // the next Google sign-in. Net effect (matching the requirement):
+  //   - the Google account whose email matches the NEW address authenticates
+  //     successfully and re-binds its `googleId`;
+  //   - the OLD Google account (old email) no longer matches any user → fails.
+  // `$unset` is used (not `save`) so the removal is reliable even though
+  // `googleId` is `select: false` and therefore not loaded on the document.
+  if (emailChanged) {
+    await User.updateOne({ _id: user._id }, { $unset: { googleId: '' } });
+  }
+
   return user.populate(POPULATE);
 };
 
