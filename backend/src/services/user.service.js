@@ -7,9 +7,14 @@ const logger = require('../utils/logger');
 const { escapeRegExp } = require('../utils/text');
 const { resolvePagination, buildPaginationMeta } = require('../utils/pagination');
 const emailService = require('./email.service');
+const cloudinaryService = require('./cloudinary.service');
+const env = require('../config/env');
 const { generateTemporaryPassword } = require('../utils/password');
 const { runInBackground } = require('../utils/background');
 const { MESSAGES } = require('../constants');
+
+// All profile pictures live in one Cloudinary subfolder.
+const AVATAR_FOLDER = `${env.cloudinary.folder}/avatars`;
 
 /**
  * User domain logic. Users are RBAC accounts, each linked to exactly one Role.
@@ -140,7 +145,40 @@ const assertRootUpdateAllowed = (user, updates, isSelf) => {
   }
 };
 
-const updateUser = async (id, updates, currentUserId) => {
+/**
+ * Apply a profile-picture change to a user document (in place; the caller saves).
+ * Uploads a new picture to Cloudinary and clears the previous asset, or removes
+ * the picture entirely when `removeAvatar` is set. The old `avatarPublicId` is
+ * `select: false`, so it is fetched explicitly to delete the stale Cloudinary
+ * asset. A no-op when neither a file nor a remove flag is provided.
+ */
+const applyAvatarChange = async (user, file, removeAvatar) => {
+  if (!file && !removeAvatar) return;
+
+  const current = await User.findById(user._id).select('+avatarPublicId').lean();
+  const oldPublicId = current?.avatarPublicId;
+
+  if (file) {
+    let uploaded;
+    try {
+      uploaded = await cloudinaryService.uploadBuffer(file.buffer, AVATAR_FOLDER);
+    } catch (err) {
+      logger.error(`[user] Avatar upload failed for ${user.email}: ${err.message}`);
+      throw ApiError.internal(MESSAGES.IMAGE_UPLOAD_FAILED);
+    }
+    user.avatarUrl = uploaded.secureUrl;
+    user.avatarPublicId = uploaded.publicId;
+  } else {
+    // removeAvatar with no replacement → clear the picture.
+    user.avatarUrl = undefined;
+    user.avatarPublicId = undefined;
+  }
+
+  // Best-effort cleanup of the previous asset (never blocks the update).
+  if (oldPublicId) await cloudinaryService.destroy(oldPublicId);
+};
+
+const updateUser = async (id, updates, currentUserId, file) => {
   const user = await findByIdOrFail(id);
   const wasSuperAdmin = !!user.role?.isSuperAdmin;
 
@@ -157,6 +195,12 @@ const updateUser = async (id, updates, currentUserId) => {
     user.email = updates.email;
   }
   if (updates.name !== undefined) user.name = updates.name;
+  if (updates.phone !== undefined) user.phone = updates.phone;
+
+  // Profile picture: upload/replace/remove (Cloudinary). `removeAvatar` arrives
+  // as a string over multipart, so treat the string 'true' as a request too.
+  const removeAvatar = updates.removeAvatar === true || updates.removeAvatar === 'true';
+  await applyAvatarChange(user, file, removeAvatar);
 
   if (updates.role !== undefined && String(updates.role) !== String(user.role?._id ?? user.role)) {
     const newRole = await getRoleOrFail(updates.role);
@@ -190,6 +234,15 @@ const updateUser = async (id, updates, currentUserId) => {
   return user.populate(POPULATE);
 };
 
+/**
+ * Self-service profile update. Identical field/avatar logic as `updateUser`, but
+ * scoped to the caller's own account: `currentUserId === userId`, so a Root user
+ * editing itself is permitted, and the (role-less) profile validation guarantees
+ * role/password are never present. Returns the populated document; the caller
+ * serialises it into the session shape.
+ */
+const updateProfile = async (userId, updates, file) => updateUser(userId, updates, userId, file);
+
 const deleteUser = async (id, currentUserId) => {
   const user = await findByIdOrFail(id);
 
@@ -205,6 +258,11 @@ const deleteUser = async (id, currentUserId) => {
   if (user.role?.isSuperAdmin && (await countSuperAdmins()) <= 1) {
     throw ApiError.badRequest(MESSAGES.USER_LAST_SUPER_ADMIN);
   }
+
+  // Best-effort removal of the profile picture asset so deleting a user doesn't
+  // orphan its avatar in Cloudinary. `avatarPublicId` is `select: false`.
+  const withAsset = await User.findById(id).select('+avatarPublicId').lean();
+  if (withAsset?.avatarPublicId) await cloudinaryService.destroy(withAsset.avatarPublicId);
 
   await user.deleteOne();
   return user;
@@ -234,6 +292,7 @@ const getUsers = async ({ page, limit, search, role } = {}) => {
 module.exports = {
   createUser,
   updateUser,
+  updateProfile,
   deleteUser,
   getUserById,
   getUsers,

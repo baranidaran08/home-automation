@@ -30,6 +30,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   quotations: 'Quotations',
   users: 'Users',
   roles: 'Roles',
+  profile: 'My Profile',
 };
 
 /** Segments that the sidebar nests under the (route-less) "Settings" group. */

@@ -14,6 +14,7 @@ const MESSAGES = {
   LOGOUT_SUCCESS: 'Logged out successfully',
   INVALID_CREDENTIALS: 'Invalid email or password',
   CURRENT_USER_FETCHED: 'Current user fetched successfully',
+  PROFILE_UPDATED: 'Profile updated successfully',
   TOKEN_MISSING: 'Authentication token is missing',
   TOKEN_INVALID: 'Invalid or expired authentication token',
   USER_NOT_FOUND: 'User account no longer exists',

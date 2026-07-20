@@ -13,8 +13,23 @@ export interface AuthUser {
   permissions: string[];
   /** True while the user still holds a temporary password (first-login lock). */
   mustChangePassword: boolean;
+  /** Optional profile fields, editable on the My Profile page. */
+  phone: string | null;
+  avatarUrl: string | null;
+  /** Most recent successful sign-in (ISO string), or null if never recorded. */
+  lastLoginAt: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+/**
+ * PATCH /profile payload. All fields optional; sent as JSON, or as multipart
+ * (with an `avatar` file / `removeAvatar` flag) when the picture changes.
+ */
+export interface UpdateProfileInput {
+  name?: string;
+  email?: string;
+  phone?: string;
 }
 
 /** Login form / request payload. */

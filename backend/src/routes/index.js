@@ -11,6 +11,7 @@ const quotationRoutes = require('./quotation.routes');
 const userRoutes = require('./user.routes');
 const roleRoutes = require('./role.routes');
 const permissionRoutes = require('./permission.routes');
+const profileRoutes = require('./profile.routes');
 
 /**
  * Top-level API router, mounted at `/api` in app.js. Every module router is
@@ -28,5 +29,6 @@ router.use('/quotations', quotationRoutes);
 router.use('/users', userRoutes);
 router.use('/roles', roleRoutes);
 router.use('/permissions', permissionRoutes);
+router.use('/profile', profileRoutes);
 
 module.exports = router;

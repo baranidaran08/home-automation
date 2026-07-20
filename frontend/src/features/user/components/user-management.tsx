@@ -1,16 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useDebounce } from '@/hooks/use-debounce';
 import { UserToolbar } from './user-toolbar';
 import { UserTable } from './user-table';
 import { UserFormDialog } from './user-form-dialog';
-import { ViewUserDialog } from './view-user-dialog';
+import { UserViewDialog } from './user-view-dialog';
 import { TablePagination } from '@/components/shared/table-pagination';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
 import { Rise } from '@/components/shared/rise';
 import { useUsers } from '../hooks/use-users';
 import { useUserMutations } from '../hooks/use-user-mutations';
+import { ROUTES } from '@/constants/routes';
 import type { User } from '@/types/rbac';
 
 const PAGE_SIZE = 10;
@@ -20,13 +22,14 @@ const PAGE_SIZE = 10;
  * Mirrors the Category Management pattern; data + mutations live in hooks.
  */
 export function UserManagement() {
+  const router = useRouter();
   const [searchInput, setSearchInput] = useState('');
   const debouncedSearch = useDebounce(searchInput, 400);
   const [page, setPage] = useState(1);
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<User | null>(null);
-  const [viewing, setViewing] = useState<User | null>(null);
+  const [viewUser, setViewUser] = useState<User | null>(null);
   const [viewOpen, setViewOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -56,12 +59,13 @@ export function UserManagement() {
     setEditing(null);
     setFormOpen(true);
   };
+  // Edit navigates to the User Details page — the single place users are edited.
   const handleEdit = (user: User) => {
-    setEditing(user);
-    setFormOpen(true);
+    router.push(ROUTES.dashboard.userDetails(user._id));
   };
+  // View opens a read-only modal (no navigation) for a quick look at the record.
   const handleView = (user: User) => {
-    setViewing(user);
+    setViewUser(user);
     setViewOpen(true);
   };
   const handleDelete = (user: User) => {
@@ -113,7 +117,7 @@ export function UserManagement() {
       </Rise>
 
       <UserFormDialog open={formOpen} onOpenChange={setFormOpen} user={editing} />
-      <ViewUserDialog open={viewOpen} onOpenChange={setViewOpen} user={viewing} />
+      <UserViewDialog open={viewOpen} onOpenChange={setViewOpen} user={viewUser} />
       <ConfirmDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}

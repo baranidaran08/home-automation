@@ -33,6 +33,29 @@ const userSchema = new Schema(
       // Excluded from queries by default; `.select('+password')` when auth needs it.
       select: false,
     },
+    // Optional contact number shown/edited on the profile. No format is enforced
+    // at the DB layer (numbers vary by country); the API validates shape.
+    phone: {
+      type: String,
+      trim: true,
+      maxlength: 20,
+    },
+    // Profile picture. The public `avatarUrl` is safe to serialise and render;
+    // `avatarPublicId` is the Cloudinary handle kept only to delete/replace the
+    // asset, so it is `select: false` (internal, never sent to the client).
+    avatarUrl: {
+      type: String,
+      trim: true,
+    },
+    avatarPublicId: {
+      type: String,
+      select: false,
+    },
+    // Timestamp of the most recent successful sign-in (password or Google),
+    // surfaced read-only on the profile / user-details pages.
+    lastLoginAt: {
+      type: Date,
+    },
     // Google account subject (`sub`), recorded when a user signs in with Google.
     // Google is just an ALTERNATIVE way into the same account — there is no
     // permanent method choice; both Email/Password and Google authenticate the

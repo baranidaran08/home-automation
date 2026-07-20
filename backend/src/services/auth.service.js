@@ -46,6 +46,7 @@ const login = async ({ email, password }) => {
     throw ApiError.unauthorized(MESSAGES.INVALID_CREDENTIALS);
   }
 
+  await recordLogin(user);
   return { user: serializeAuthUser(user), token: issueToken(user) };
 };
 
@@ -110,7 +111,24 @@ const loginWithGoogle = async ({ idToken }) => {
     await user.save({ validateBeforeSave: false });
   }
 
+  await recordLogin(user);
   return { user: serializeAuthUser(user), token: issueToken(user) };
+};
+
+/**
+ * Stamp the most-recent successful sign-in. Written with a targeted `updateOne`
+ * (not `save`) so it never re-triggers the password-hash hook or validation, and
+ * mirrored onto the in-memory doc so the value we serialise back is current.
+ * Best-effort: a failed write must never block an otherwise valid login.
+ */
+const recordLogin = async (user) => {
+  const now = new Date();
+  try {
+    await User.updateOne({ _id: user._id }, { $set: { lastLoginAt: now } });
+    user.lastLoginAt = now;
+  } catch (err) {
+    logger.warn(`[auth] Failed to record lastLoginAt for ${user.email}: ${err.message}`);
+  }
 };
 
 /**

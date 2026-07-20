@@ -31,6 +31,11 @@ const serializeAuthUser = (user) => {
     permissions: rolePermissionKeys(role),
     // First-login flag: the frontend redirects to /change-password while true.
     mustChangePassword: !!user.mustChangePassword,
+    // Profile fields (editable name aside): contact number, avatar URL, and the
+    // last sign-in timestamp. `avatarPublicId` is intentionally never exposed.
+    phone: user.phone ?? null,
+    avatarUrl: user.avatarUrl ?? null,
+    lastLoginAt: user.lastLoginAt ?? null,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };

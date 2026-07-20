@@ -25,6 +25,18 @@ const password = z
   .min(8, 'Password must be at least 8 characters')
   .max(128, 'Password must be at most 128 characters');
 
+// Optional phone number. Kept permissive (digits, spaces, +, -, parens) so it
+// works across regions; an empty string clears the stored value.
+const phone = z
+  .string()
+  .trim()
+  .max(20, 'Phone number must be at most 20 characters')
+  .refine((v) => v === '' || /^[+\d][\d\s()-]{5,}$/.test(v), 'Enter a valid phone number');
+
+// Multipart sends everything as strings, so the remove-avatar flag is the
+// literal string 'true'/'false' (or a boolean when sent as JSON).
+const removeAvatar = z.union([z.boolean(), z.enum(['true', 'false'])]);
+
 /**
  * POST /users — no password field. The backend generates a secure temporary
  * password itself (see user.service), so a Super Admin never sets one.
@@ -37,7 +49,11 @@ const createUserSchema = z.object({
   }),
 });
 
-/** PATCH /users/:id — all fields optional, but at least one required. */
+/**
+ * PATCH /users/:id — all fields optional, but at least one required. Accepts an
+ * optional `avatar` file (handled by multer, not here) plus a `removeAvatar`
+ * flag; either one alone counts as a valid update even with no text fields.
+ */
 const updateUserSchema = z.object({
   params: z.object({ id: objectId }),
   body: z
@@ -46,6 +62,8 @@ const updateUserSchema = z.object({
       email: email.optional(),
       password: password.optional(),
       role: objectId.optional(),
+      phone: phone.optional(),
+      removeAvatar: removeAvatar.optional(),
     })
     .refine((data) => Object.keys(data).length > 0, {
       message: 'Provide at least one field to update',

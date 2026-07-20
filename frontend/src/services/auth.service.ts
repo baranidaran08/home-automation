@@ -29,6 +29,13 @@ export const authService = {
   changePassword: (input: ChangePasswordInput) =>
     httpService.post<AuthPayload, ChangePasswordInput>('/auth/change-password', input),
 
+  /**
+   * Update the signed-in user's own profile (name/email/phone/picture). Sent as
+   * multipart so the same call covers text-only edits and avatar upload/remove;
+   * returns the refreshed session user for the auth store.
+   */
+  updateProfile: (formData: FormData) => httpService.patchForm<AuthPayload>('/profile', formData),
+
   forgotPassword: (input: ForgotPasswordInput) =>
     httpService.post<null, ForgotPasswordInput>('/auth/forgot-password', input),
 

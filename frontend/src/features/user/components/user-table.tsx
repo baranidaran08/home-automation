@@ -74,7 +74,11 @@ export function UserTable({ users, isLoading, onView, onEdit, onDelete }: UserTa
               const isRoot = Boolean(user.isRoot);
               const isSelf = currentUserId === user._id;
               return (
-              <TableRow key={user._id}>
+              <TableRow
+                key={user._id}
+                onClick={() => onView(user)}
+                className="cursor-pointer"
+              >
                 <TableCell className="font-medium">
                   <span className="flex items-center gap-2">
                     {user.name}
@@ -98,10 +102,15 @@ export function UserTable({ users, isLoading, onView, onEdit, onDelete }: UserTa
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center justify-end gap-1">
+                    {/* Action buttons stop propagation so they don't also trigger
+                        the row's navigate-to-details click. */}
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => onView(user)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onView(user);
+                      }}
                       aria-label={`View ${user.name}`}
                     >
                       <Eye className="h-4 w-4" />
@@ -112,7 +121,10 @@ export function UserTable({ users, isLoading, onView, onEdit, onDelete }: UserTa
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => onEdit(user)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onEdit(user);
+                          }}
                           aria-label={`Edit ${user.name}`}
                         >
                           <Pencil className="h-4 w-4" />
@@ -125,7 +137,10 @@ export function UserTable({ users, isLoading, onView, onEdit, onDelete }: UserTa
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => onDelete(user)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDelete(user);
+                          }}
                           aria-label={`Delete ${user.name}`}
                           className="text-destructive hover:text-destructive"
                         >

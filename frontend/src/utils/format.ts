@@ -22,6 +22,18 @@ export function formatDate(
   return new Intl.DateTimeFormat(locale, options).format(date);
 }
 
+/**
+ * Format an ISO date string / Date as a readable date + time, e.g.
+ * "18 Jul 2026, 09:15 AM". Used for the "Last Login" field.
+ */
+export function formatDateTime(value: string | Date, locale = 'en-IN'): string {
+  const date = typeof value === 'string' ? new Date(value) : value;
+  return new Intl.DateTimeFormat(locale, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(date);
+}
+
 /** Truncate a string to `max` characters with an ellipsis. */
 export function truncate(text: string, max: number): string {
   return text.length > max ? `${text.slice(0, max).trimEnd()}…` : text;

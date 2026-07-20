@@ -23,11 +23,12 @@ const create = asyncHandler(async (req, res) => {
   return ApiResponse.created(res, user, MESSAGES.USER_CREATED);
 });
 
-/** PATCH /api/users/:id */
+/** PATCH /api/users/:id — JSON or multipart (with an optional `avatar` file). */
 const update = asyncHandler(async (req, res) => {
   // Pass the caller's id so the service can enforce Root Super Admin protection
-  // (only the Root owner may edit sensitive fields on the Root account).
-  const user = await userService.updateUser(req.params.id, req.body, req.user._id);
+  // (only the Root owner may edit sensitive fields on the Root account), and the
+  // uploaded file (if any) for the profile picture.
+  const user = await userService.updateUser(req.params.id, req.body, req.user._id, req.file);
   return ApiResponse.ok(res, user, MESSAGES.USER_UPDATED);
 });
 

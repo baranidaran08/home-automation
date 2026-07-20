@@ -42,6 +42,13 @@ export interface User {
   role: RoleSummary;
   /** The protected seeded Root Super Admin (cannot be deleted; role locked). */
   isRoot?: boolean;
+  /** Optional profile fields. */
+  phone?: string | null;
+  avatarUrl?: string | null;
+  /** Still holds a temporary password → invitation pending (not yet activated). */
+  mustChangePassword?: boolean;
+  /** Most recent successful sign-in (ISO string), or null if never recorded. */
+  lastLoginAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -64,6 +71,7 @@ export interface UpdateUserInput {
   email?: string;
   password?: string;
   role?: string;
+  phone?: string;
 }
 
 export interface RoleListParams {

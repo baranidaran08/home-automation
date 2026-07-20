@@ -37,6 +37,19 @@ export function useUserMutations() {
     onError: (err) => toast.error(errorMessage(err, 'Failed to update user')),
   });
 
+  // Multipart variant for the User Details page (fields + optional avatar). Also
+  // refreshes that user's cached detail so the page reflects the saved record.
+  const updateForm = useMutation({
+    mutationFn: ({ id, formData }: { id: string; formData: FormData }) =>
+      userService.updateForm(id, formData),
+    onSuccess: (_data, { id }) => {
+      toast.success('User updated');
+      invalidate();
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.detail(id) });
+    },
+    onError: (err) => toast.error(errorMessage(err, 'Failed to update user')),
+  });
+
   const remove = useMutation({
     mutationFn: (id: string) => userService.remove(id),
     onSuccess: () => {
@@ -46,5 +59,5 @@ export function useUserMutations() {
     onError: (err) => toast.error(errorMessage(err, 'Failed to delete user')),
   });
 
-  return { create, update, remove };
+  return { create, update, updateForm, remove };
 }

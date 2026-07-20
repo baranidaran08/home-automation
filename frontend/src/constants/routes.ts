@@ -23,6 +23,10 @@ export const ROUTES = {
     templates: '/dashboard/templates',
     quotations: '/dashboard/quotations',
     users: '/dashboard/users',
+    /** A single user's detail/edit page. */
+    userDetails: (id: string) => `/dashboard/users/${id}`,
     roles: '/dashboard/roles',
+    /** The signed-in user's own account page. */
+    profile: '/dashboard/profile',
   },
 } as const;

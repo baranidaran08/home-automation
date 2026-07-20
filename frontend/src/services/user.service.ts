@@ -19,5 +19,13 @@ export const userService = {
   update: (id: string, input: UpdateUserInput) =>
     httpService.patch<User, UpdateUserInput>(`${BASE}/${id}`, input),
 
+  /**
+   * Multipart update for the User Details page: the same fields plus an optional
+   * `avatar` file / `removeAvatar` flag. Used where a profile picture may change;
+   * the dialog keeps using the plain JSON `update` above for quick edits.
+   */
+  updateForm: (id: string, formData: FormData) =>
+    httpService.patchForm<User>(`${BASE}/${id}`, formData),
+
   remove: (id: string) => httpService.delete<{ id: string }>(`${BASE}/${id}`),
 };
