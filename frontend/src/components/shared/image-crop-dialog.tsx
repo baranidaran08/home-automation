@@ -45,9 +45,24 @@ export function ImageCropDialog({ open, file, onCancel, onCropped }: ImageCropDi
   const [saving, setSaving] = useState(false);
 
   const imgRef = useRef<HTMLImageElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const drag = useRef<{ startX: number; startY: number; baseX: number; baseY: number } | null>(
     null
   );
+
+  // Mouse-wheel / trackpad zoom over the crop area. Registered natively with
+  // `{ passive: false }` so we can preventDefault and stop the page scrolling
+  // while zooming (React's onWheel is passive and can't).
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      setZoom((z) => clamp(z - e.deltaY * 0.0015, MIN_ZOOM, MAX_ZOOM));
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, [open]);
 
   // Build (and revoke) an object URL for the picked file; reset the transform.
   useEffect(() => {
@@ -136,20 +151,22 @@ export function ImageCropDialog({ open, file, onCancel, onCropped }: ImageCropDi
         <DialogHeader>
           <DialogTitle>Adjust photo</DialogTitle>
           <DialogDescription>
-            Drag to reposition and zoom so your photo sits inside the circle.
+            Drag to reposition, scroll or use the slider to zoom, so your photo sits inside the
+            circle.
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col items-center gap-5 py-2">
           {/* Crop viewport: image underneath, a circular cut-out mask on top. */}
           <div
-            className="relative touch-none overflow-hidden rounded-lg bg-muted"
+            ref={containerRef}
+            className="relative cursor-grab touch-none overflow-hidden rounded-lg bg-muted active:cursor-grabbing"
             style={{ width: VIEWPORT, height: VIEWPORT }}
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
             role="application"
-            aria-label="Drag to reposition photo"
+            aria-label="Drag to reposition photo, scroll to zoom"
           >
             {src && (
               // eslint-disable-next-line @next/next/no-img-element
