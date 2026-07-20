@@ -286,7 +286,9 @@
 
   /* Make browser autofill (Chrome/Edge/WebKit) match the app theme instead of
      the default grey/yellow. The inset box-shadow paints the field's own
-     background; text/caret use the theme foreground. */
+     background; text/caret use the theme foreground. `--secondary` matches the
+     form inputs' resting background (bg-secondary/50) — using `--background`
+     here painted them near-black, standing out against the grey fields. */
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
@@ -297,10 +299,23 @@
   select:-webkit-autofill,
   select:-webkit-autofill:focus {
     -webkit-text-fill-color: hsl(var(--foreground));
-    -webkit-box-shadow: 0 0 0 1000px hsl(var(--background)) inset;
-    box-shadow: 0 0 0 1000px hsl(var(--background)) inset;
+    -webkit-box-shadow: 0 0 0 1000px hsl(var(--secondary)) inset;
+    box-shadow: 0 0 0 1000px hsl(var(--secondary)) inset;
     caret-color: hsl(var(--foreground));
     border-radius: inherit;
     transition: background-color 5000s ease-in-out 0s;
+  }
+
+  /* The login screen (.xen-auth) uses its own field tokens, so autofill there
+     must paint the xen card colour / ink rather than the app tokens — otherwise
+     the autofilled email field renders black against the login card. */
+  .xen-auth input:-webkit-autofill,
+  .xen-auth input:-webkit-autofill:hover,
+  .xen-auth input:-webkit-autofill:focus,
+  .xen-auth input:-webkit-autofill:active {
+    -webkit-text-fill-color: hsl(var(--xen-ink));
+    -webkit-box-shadow: 0 0 0 1000px hsl(var(--xen-card)) inset;
+    box-shadow: 0 0 0 1000px hsl(var(--xen-card)) inset;
+    caret-color: hsl(var(--xen-ink));
   }
 }
