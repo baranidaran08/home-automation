@@ -30,7 +30,10 @@ export function AppProviders({ children }: { children: ReactNode }) {
     // button. Harmless when the client id is empty (Google Sign-In simply isn't
     // configured) — the login form hides the button in that case.
     <GoogleOAuthProvider clientId={env.googleClientId}>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+      {/* Dark-only: the app ships a single dark theme. `forcedTheme` pins the
+          `.dark` class on <html> and ignores any stored/system preference, so
+          there is no light mode and no theme toggle. */}
+      <ThemeProvider attribute="class" defaultTheme="dark" forcedTheme="dark" disableTransitionOnChange>
         <QueryProvider>
           <AuthProvider>{children}</AuthProvider>
           <TransitionOverlay />

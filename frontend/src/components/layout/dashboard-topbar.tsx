@@ -2,7 +2,6 @@
 
 import { Menu, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ThemeToggle } from './theme-toggle';
 import { useAuth } from '@/features/auth';
 
 /** Derive up-to-two-letter initials from a name for the avatar badge. */
@@ -43,8 +42,6 @@ export function DashboardTopbar({ onMenuClick }: DashboardTopbarProps) {
       </div>
 
       <div className="flex items-center gap-2 sm:gap-3">
-        <ThemeToggle />
-
         {/* The pill chrome only applies once the name/role is visible (`sm` up).
             On phones the text is hidden, and keeping the pill's asymmetric
             padding would leave dead space beside the avatar and render a
