@@ -31,12 +31,17 @@ export function UserMenu() {
 
   const handleLogout = async () => {
     setLoggingOut(true);
+    // Close the confirmation FIRST and yield a tick so Radix runs its close
+    // cleanup — which restores the `pointer-events` lock it puts on <body> —
+    // BEFORE the logout navigation unmounts the whole tree. Navigating while the
+    // dialog is still open leaks that lock, leaving the login page unclickable
+    // until a manual refresh. Then reuse the existing logout logic verbatim.
+    setConfirmOpen(false);
+    await new Promise((resolve) => setTimeout(resolve, 0));
     try {
-      // Reuse the existing logout logic verbatim (clears session + redirects).
       await logout();
     } finally {
       setLoggingOut(false);
-      setConfirmOpen(false);
     }
   };
 
@@ -91,12 +96,10 @@ export function UserMenu() {
 
           <DropdownMenuItem
             destructive
-            // Defer opening the dialog until after the menu has closed so focus
-            // returns cleanly, then the AlertDialog takes over.
-            onSelect={(e) => {
-              e.preventDefault();
-              setConfirmOpen(true);
-            }}
+            // Let the menu close normally on select (no preventDefault), then
+            // open the confirm dialog — so only ONE Radix modal layer is ever
+            // open at a time, avoiding a stacked-layer body-lock leak on logout.
+            onSelect={() => setConfirmOpen(true)}
           >
             <LogOut aria-hidden />
             Logout

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -33,6 +33,16 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const reduce = useReducedMotion();
+
+  // Safety net: if a Radix overlay (e.g. the logout confirmation dialog) leaked a
+  // `pointer-events: none` lock on <body> during the logout navigation, clear it
+  // when the login form mounts so the page is interactive without a manual
+  // refresh. A no-op when nothing leaked.
+  useEffect(() => {
+    if (document.body.style.pointerEvents === 'none') {
+      document.body.style.pointerEvents = '';
+    }
+  }, []);
 
   const {
     register,
