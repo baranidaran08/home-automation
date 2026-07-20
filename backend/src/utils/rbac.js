@@ -31,11 +31,6 @@ const serializeAuthUser = (user) => {
     permissions: rolePermissionKeys(role),
     // First-login flag: the frontend redirects to /change-password while true.
     mustChangePassword: !!user.mustChangePassword,
-    // The user's locked authentication method ('LOCAL' | 'GOOGLE' | null) and
-    // whether they have completed activation. Exposed so the UI can reflect the
-    // account state; never exposes googleId.
-    authMethod: user.authMethod ?? null,
-    accountActivated: !!user.accountActivated,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };

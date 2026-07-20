@@ -88,10 +88,10 @@ const renderEmailShell = (bodyHtml) => `
 `;
 
 /**
- * Invitation email for a newly-created employee. Presents the PERMANENT one-time
- * authentication choice: sign in with the temporary Email & Password, OR continue
- * with Google. Both buttons open the same login page; the method is locked by
- * whichever the user completes first. Content lives here (an email concern),
+ * Invitation email for a newly-created employee. Carries the temporary password
+ * used to activate the account: the user signs in with it and is required to set
+ * their own password on first login. After activation they can sign in with
+ * either Email/Password or Google. Content lives here (an email concern),
  * keeping the caller (user.service) thin.
  *
  * @param {{ name: string, email: string, password: string, roleName: string }} params
@@ -105,80 +105,36 @@ const sendWelcomeEmail = async ({ name, email, password, roleName }) => {
     '',
     `Your ${APP_NAME} account has been created successfully.`,
     '',
-    `Role: ${roleName}`,
-    '',
-    `Choose how you would like to sign in to ${APP_NAME}.`,
-    '',
-    '-------------------------------------------',
-    'OPTION 1 — Login with Email & Password',
-    '-------------------------------------------',
     `Email: ${email}`,
     `Temporary Password: ${password}`,
+    `Role: ${roleName}`,
     `Login: ${loginUrl}`,
     '',
-    '                    OR',
-    '',
-    '-------------------------------------------',
-    'OPTION 2 — Continue with Google',
-    '-------------------------------------------',
-    `Open ${loginUrl} and choose "Continue with Google".`,
-    '',
-    'IMPORTANT',
-    '• This is a permanent, one-time authentication choice.',
-    '• If you choose Email & Password, all future logins must use Email & Password.',
-    '• If you choose Google, all future logins must use Google Sign-In.',
+    'Sign in with the temporary password above. You will be asked to set your own',
+    'password on first login. After that, you can sign in with either your password',
+    'or Google.',
   ].join('\n');
-
-  // A bordered "option" card, reused for both choices.
-  const optionCard = (label, inner) => `
-    <div style="border:1px solid #e6e6ea;border-radius:10px;padding:18px 20px;margin:0 0 14px;">
-      <p style="margin:0 0 12px;font-size:11px;font-weight:700;letter-spacing:0.04em;
-                text-transform:uppercase;color:${BRAND.accent};">${label}</p>
-      ${inner}
-    </div>
-  `;
-
-  const button = (href, text_) => `
-    <a href="${href}"
-       style="display:inline-block;width:100%;box-sizing:border-box;text-align:center;
-              background:${BRAND.accent};color:#ffffff;text-decoration:none;font-size:14px;
-              font-weight:600;padding:11px 20px;border-radius:8px;">${text_}</a>
-  `;
 
   const html = renderEmailShell(`
     <p style="margin:0 0 16px;font-size:15px;">Hello ${name},</p>
-    <p style="margin:0 0 6px;font-size:14px;line-height:1.6;color:${BRAND.body};">
+    <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:${BRAND.body};">
       Your ${APP_NAME} account has been created successfully.
     </p>
-    <p style="margin:0 0 16px;font-size:14px;"><strong>Role:</strong> ${roleName}</p>
-    <p style="margin:0 0 18px;font-size:14px;line-height:1.6;color:${BRAND.body};">
-      Choose how you would like to sign in to ${APP_NAME}.
-    </p>
-
-    ${optionCard(
-      'Option 1 — Login with Email &amp; Password',
-      `<p style="margin:0 0 6px;font-size:14px;"><strong>Email:</strong><br/>${email}</p>
-       <p style="margin:0 0 14px;font-size:14px;"><strong>Temporary Password:</strong><br/>${password}</p>
-       ${button(loginUrl, 'Login with Email &amp; Password')}`
-    )}
-
-    <p style="margin:0 0 14px;text-align:center;font-size:12px;font-weight:600;color:${BRAND.muted};">OR</p>
-
-    ${optionCard(
-      'Option 2 — Continue with Google',
-      `<p style="margin:0 0 14px;font-size:14px;line-height:1.6;color:${BRAND.body};">
-         Use your Google account (it must match the email above).
-       </p>
-       ${button(loginUrl, 'Continue with Google')}`
-    )}
-
-    <div style="margin:18px 0 0;padding:12px 14px;background:#fffbeb;border:1px solid #fde68a;
-                border-radius:8px;font-size:13px;line-height:1.7;color:#92400e;">
-      <strong>Important</strong><br/>
-      • This is a permanent, one-time authentication choice.<br/>
-      • If you choose Email &amp; Password, all future logins must use Email &amp; Password.<br/>
-      • If you choose Google, all future logins must use Google Sign-In.
+    <p style="margin:0 0 8px;font-size:14px;"><strong>Email:</strong><br/>${email}</p>
+    <p style="margin:0 0 8px;font-size:14px;"><strong>Temporary Password:</strong><br/>${password}</p>
+    <p style="margin:0 0 16px;font-size:14px;"><strong>Role:</strong><br/>${roleName}</p>
+    <div style="text-align:center;margin:28px 0;">
+      <a href="${loginUrl}"
+         style="display:inline-block;background:${BRAND.accent};color:#ffffff;text-decoration:none;
+                font-size:14px;font-weight:600;padding:12px 28px;border-radius:8px;">
+        Sign in
+      </a>
     </div>
+    <p style="margin:0;font-size:13px;line-height:1.6;color:${BRAND.muted};">
+      Sign in with the temporary password above — you will be asked to set your own
+      password on first login. After that, you can sign in with either your password
+      or Google.
+    </p>
   `);
 
   return sendMail({ to: email, subject, text, html });
