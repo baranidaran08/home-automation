@@ -97,7 +97,9 @@ export function AvatarUploader({
   };
 
   return (
-    <div className="relative inline-block">
+    // `w-fit` so the badge anchors to the avatar's edge even inside a stretching
+    // flex column (otherwise the -right badge jumps to the container's far edge).
+    <div className="relative w-fit shrink-0">
       <Avatar
         src={shownSrc}
         name={name}

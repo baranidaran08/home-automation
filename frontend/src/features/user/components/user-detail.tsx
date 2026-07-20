@@ -50,7 +50,8 @@ export function UserDetail({ id }: { id: string }) {
     register,
     handleSubmit,
     reset,
-    formState: { errors, isDirty },
+    watch,
+    formState: { errors },
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     values: {
@@ -69,11 +70,21 @@ export function UserDetail({ id }: { id: string }) {
   }, [user?._id, user?.role?._id, user?.avatarUrl]);
 
   // Reveal the action bar when any editable value (fields, picture, or role)
-  // differs from its original; independent of `isPending` so it stays up while
-  // saving. Returning a value to its original hides the bar again.
+  // differs from its original. We compare the live field values against the
+  // loaded user EXPLICITLY rather than relying on RHF's `isDirty`, which is
+  // unreliable here because the user data arrives asynchronously (the values
+  // prop changes after mount) — that mismatch made the bar show with no edits.
+  // Returning a value to its original hides the bar again.
+  const current = watch();
+  const fieldsChanged =
+    current.name !== (user?.name ?? '') ||
+    current.email !== (user?.email ?? '') ||
+    current.phone !== (user?.phone ?? '');
   const avatarChanged = avatarFile !== null || avatarRemoved;
-  const roleChanged = Boolean(user) && role !== (user?.role?._id ?? '');
-  const hasChanges = isDirty || avatarChanged || roleChanged;
+  // `Boolean(role)` guards the brief pre-init window where role state is still
+  // empty (seeded by the effect after load), so it never counts as a change.
+  const roleChanged = Boolean(role) && role !== (user?.role?._id ?? '');
+  const hasChanges = fieldsChanged || avatarChanged || roleChanged;
 
   const onSubmit = async (values: ProfileFormValues) => {
     const formData = new FormData();
@@ -211,7 +222,11 @@ export function UserDetail({ id }: { id: string }) {
 
                 <div className="space-y-2">
                   <Label htmlFor="user-role">Role</Label>
+                  {/* Re-mount once the options arrive so the trigger shows the
+                      seeded role label instead of the placeholder (Radix Select
+                      doesn't display a value set before its items existed). */}
                   <Select
+                    key={`role-${roleOptions.length}`}
                     value={role}
                     onValueChange={setRole}
                     disabled={isPending || loadingRoles || isRoot}
