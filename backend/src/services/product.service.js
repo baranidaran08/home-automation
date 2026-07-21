@@ -7,6 +7,7 @@ const { escapeRegExp } = require('../utils/text');
 const { generateUniqueSlug } = require('../utils/uniqueSlug');
 const { resolvePagination, buildPaginationMeta } = require('../utils/pagination');
 const cloudinaryService = require('./cloudinary.service');
+const productCache = require('./product-cache.service');
 const logger = require('../utils/logger');
 const { MESSAGES } = require('../constants');
 
@@ -57,6 +58,8 @@ const createProduct = async ({ data, files = [] }) => {
     slug,
   });
 
+  // A new product can appear in any list/filter/brand result — drop the cache.
+  await productCache.invalidate();
   return product.populate(CATEGORY_POPULATE);
 };
 
@@ -107,6 +110,8 @@ const updateProduct = async (id, { data, files = [] }) => {
   }
 
   await product.save();
+  // Fields (name/category/brand/price/status/images) may have changed — refresh.
+  await productCache.invalidate();
   return product.populate(CATEGORY_POPULATE);
 };
 
@@ -115,13 +120,35 @@ const deleteProduct = async (id) => {
   // Best-effort cleanup of Cloudinary assets before removing the document.
   await cloudinaryService.destroyMany(product.images.map((img) => img.publicId));
   await product.deleteOne();
+  await productCache.invalidate();
   return product;
 };
 
-const getProductById = async (id) => findByIdOrFail(id, { populate: true });
+/**
+ * Get one product by id (read-through cache):
+ *  1. Return the cached copy if present.
+ *  2. Otherwise load from MongoDB, cache it with a TTL, and return it.
+ * The cached JSON is byte-identical to a fresh populated doc's JSON, so the API
+ * response is unchanged whether it was a cache hit or miss.
+ */
+const getProductById = async (id) => {
+  const cached = await productCache.getDetail(id);
+  if (cached) return cached;
 
-/** List with search (name/brand/model), category/brand/status filters + pagination. */
-const getProducts = async ({ page, limit, search, category, brand, status } = {}) => {
+  const product = await findByIdOrFail(id, { populate: true });
+  await productCache.setDetail(id, product);
+  return product;
+};
+
+/**
+ * List with search (name/brand/model), category/brand/status filters +
+ * pagination — read-through cached per unique query combination.
+ */
+const getProducts = async (params = {}) => {
+  const cached = await productCache.getList(params);
+  if (cached) return cached;
+
+  const { page, limit, search, category, brand, status } = params;
   const { page: safePage, limit: safeLimit, skip } = resolvePagination({ page, limit });
 
   const filter = {};
@@ -142,13 +169,20 @@ const getProducts = async ({ page, limit, search, category, brand, status } = {}
     Product.countDocuments(filter),
   ]);
 
-  return { items, meta: buildPaginationMeta({ page: safePage, limit: safeLimit, total }) };
+  const result = { items, meta: buildPaginationMeta({ page: safePage, limit: safeLimit, total }) };
+  await productCache.setList(params, result);
+  return result;
 };
 
-/** Distinct non-empty brands (for the brand filter dropdown). */
+/** Distinct non-empty brands (for the brand filter dropdown) — read-through cached. */
 const getBrands = async () => {
+  const cached = await productCache.getBrands();
+  if (cached) return cached;
+
   const brands = await Product.distinct('brand', { brand: { $nin: ['', null] } });
-  return brands.sort((a, b) => a.localeCompare(b));
+  const sorted = brands.sort((a, b) => a.localeCompare(b));
+  await productCache.setBrands(sorted);
+  return sorted;
 };
 
 module.exports = {

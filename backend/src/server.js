@@ -4,6 +4,7 @@ const createApp = require('./app');
 const env = require('./config/env');
 const logger = require('./utils/logger');
 const { connectDatabase, disconnectDatabase } = require('./config/database');
+const { initRedis, disconnectRedis } = require('./config/redis');
 const { configureCloudinary } = require('./config/cloudinary');
 const { seedDatabase } = require('./seeders/bootstrap');
 
@@ -15,6 +16,9 @@ const { seedDatabase } = require('./seeders/bootstrap');
 const start = async () => {
   // Configure third-party SDKs before serving traffic.
   configureCloudinary();
+  // Warm up the (optional) Redis cache connection. Non-blocking and non-fatal:
+  // if Redis is down or not configured the API still serves from MongoDB.
+  initRedis();
 
   await connectDatabase();
 
@@ -37,6 +41,7 @@ const start = async () => {
   const shutdown = async (signal) => {
     logger.warn(`${signal} received. Shutting down gracefully...`);
     server.close(async () => {
+      await disconnectRedis();
       await disconnectDatabase();
       process.exit(0);
     });

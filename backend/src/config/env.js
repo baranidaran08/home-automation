@@ -73,6 +73,21 @@ const env = {
     saltRounds: parseInt(optional('BCRYPT_SALT_ROUNDS', '12'), 10),
   },
 
+  // Redis cache layer (optional). MongoDB stays the primary datastore; Redis
+  // only accelerates reads. Leave REDIS_URL empty to disable caching entirely —
+  // the app then serves every request straight from MongoDB.
+  redis: (() => {
+    const url = optional('REDIS_URL', '');
+    return {
+      url,
+      // Enabled only when a URL is configured and not explicitly turned off.
+      enabled: url !== '' && optional('REDIS_ENABLED', 'true').toLowerCase() !== 'false',
+      keyPrefix: optional('REDIS_KEY_PREFIX', 'xen:'),
+      // TTL for product list/detail cache entries (default 5 minutes).
+      productTtlSeconds: parseInt(optional('REDIS_PRODUCT_TTL_SECONDS', '300'), 10),
+    };
+  })(),
+
   cloudinary: {
     cloudName: optional('CLOUDINARY_CLOUD_NAME', ''),
     apiKey: optional('CLOUDINARY_API_KEY', ''),

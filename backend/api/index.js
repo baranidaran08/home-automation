@@ -3,6 +3,7 @@
 const createApp = require('../src/app');
 const logger = require('../src/utils/logger');
 const { connectDatabase } = require('../src/config/database');
+const { initRedis } = require('../src/config/redis');
 const { configureCloudinary } = require('../src/config/cloudinary');
 const { seedDatabase } = require('../src/seeders/bootstrap');
 
@@ -19,6 +20,9 @@ const { seedDatabase } = require('../src/seeders/bootstrap');
 
 // ---- Module scope: runs ONCE per cold start, not per request -----------------
 configureCloudinary();
+// Open the (optional) Redis cache connection once per cold start. Reused across
+// warm invocations; non-fatal when Redis is absent or unreachable.
+initRedis();
 const app = createApp();
 
 let bootstrapPromise = null;
