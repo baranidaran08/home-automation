@@ -67,13 +67,14 @@ const config: Config = {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
-      // Soft, diffuse elevation — the premium-SaaS look. Deliberately low-opacity
-      // and blue-tinted so cards lift off the light-gray canvas without hard edges.
+      // Vercel-minimal elevation. Separation comes from borders and surface
+      // steps; shadows are barely-there and reserved for genuinely floating
+      // layers (dropdowns, dialogs). No brand glow.
       boxShadow: {
-        soft: '0 1px 2px 0 rgb(16 24 40 / 0.04), 0 1px 3px 0 rgb(16 24 40 / 0.06)',
-        card: '0 1px 3px 0 rgb(16 24 40 / 0.04), 0 8px 24px -6px rgb(16 24 40 / 0.08)',
-        float: '0 4px 6px -1px rgb(16 24 40 / 0.04), 0 20px 40px -8px rgb(16 24 40 / 0.10)',
-        brand: '0 4px 14px -2px hsl(var(--primary) / 0.35)',
+        soft: '0 1px 2px 0 rgb(0 0 0 / 0.20)',
+        card: '0 1px 2px 0 rgb(0 0 0 / 0.16)',
+        float: '0 8px 30px -6px rgb(0 0 0 / 0.45)',
+        brand: '0 1px 2px 0 rgb(0 0 0 / 0.20)',
       },
       keyframes: {
         'accordion-down': {

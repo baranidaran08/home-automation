@@ -31,10 +31,9 @@ export const FloatingInput = React.forwardRef<HTMLInputElement, FloatingInputPro
           placeholder=" "
           aria-invalid={invalid || undefined}
           className={cn(
-            'peer h-14 w-full rounded-2xl border border-input bg-secondary/50 px-4 pb-1 pt-6 text-[15px] text-foreground outline-none transition-all',
+            'peer h-14 w-full rounded-lg border border-input bg-background px-4 pb-1 pt-6 text-[15px] text-foreground outline-none transition-colors',
             'placeholder:text-transparent',
-            'hover:border-primary/40',
-            'focus:border-primary focus:bg-card focus:ring-4 focus:ring-primary/15',
+            'focus:border-ring focus:ring-1 focus:ring-ring',
             'disabled:cursor-not-allowed disabled:opacity-50',
             'aria-[invalid=true]:border-destructive aria-[invalid=true]:focus:ring-destructive/15',
             trailing && 'pr-12',

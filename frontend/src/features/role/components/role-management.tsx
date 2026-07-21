@@ -80,9 +80,9 @@ export function RoleManagement() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6">
+    <div className="mx-auto max-w-7xl space-y-8">
       <Rise index={0}>
-        <h1 className="text-3xl font-bold tracking-tight">Roles</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">Roles</h1>
         <p className="text-sm text-muted-foreground">
           Define roles and the exact actions each one can perform across the system.
         </p>

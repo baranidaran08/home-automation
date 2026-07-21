@@ -17,10 +17,12 @@ export const metadata: Metadata = {
  */
 export default function DashboardPage() {
   return (
-    <div className="mx-auto max-w-7xl space-y-6">
+    <div className="mx-auto max-w-7xl space-y-10">
       <Rise index={0}>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Overview of your home automation system.</p>
+        <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Overview of your home automation system.
+        </p>
       </Rise>
 
       {/* Stat cards stagger themselves at indexes 1-4. */}

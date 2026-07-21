@@ -16,7 +16,7 @@ import { usePermissions } from '@/hooks/use-permissions';
 /** Brand header shown at the top of the sidebar. */
 function SidebarBrand() {
   return (
-    <div className="px-6 pb-6 pt-7">
+    <div className="px-5 pb-6 pt-6">
       <BrandLogo />
     </div>
   );
@@ -24,18 +24,16 @@ function SidebarBrand() {
 
 /** Shared row styling for both real links and the disabled/secondary items. */
 const rowBase =
-  'group relative flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all';
+  'group relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors';
 
 /** A single navigation link (top level or nested inside a group). */
 function NavLink({
   item,
   isActive,
-  nested = false,
   onNavigate,
 }: {
   item: NavItem;
   isActive: boolean;
-  nested?: boolean;
   onNavigate?: () => void;
 }) {
   const Icon = item.icon;
@@ -63,27 +61,17 @@ function NavLink({
       aria-current={isActive ? 'page' : undefined}
       className={cn(
         rowBase,
+        // Vercel nav: muted by default, resolves to full foreground on hover/active
+        // over a neutral fill. Colour is reserved for buttons/links, not nav.
         isActive
-          ? 'bg-accent font-semibold text-accent-foreground'
-          : // Near-foreground (not `muted`) so idle labels stay clearly legible —
-            // muted sits below the WCAG AA 4.5:1 minimum on the white sidebar.
-            'text-foreground/80 hover:bg-secondary hover:text-foreground'
+          ? 'bg-accent text-foreground'
+          : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground'
       )}
     >
-      {/* Purple active indicator rail (top-level rows only). */}
-      {!nested && (
-        <span
-          aria-hidden
-          className={cn(
-            'absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-primary transition-opacity',
-            isActive ? 'opacity-100' : 'opacity-0'
-          )}
-        />
-      )}
       <Icon
         className={cn(
           'h-[18px] w-[18px] transition-colors',
-          isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
+          isActive ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'
         )}
         aria-hidden
       />
@@ -131,14 +119,14 @@ function NavGroupSection({
           rowBase,
           'w-full text-left',
           hasActiveChild
-            ? 'font-semibold text-foreground'
-            : 'text-foreground/80 hover:bg-secondary hover:text-foreground'
+            ? 'text-foreground'
+            : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground'
         )}
       >
         <Icon
           className={cn(
             'h-[18px] w-[18px] transition-colors',
-            hasActiveChild ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
+            hasActiveChild ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'
           )}
           aria-hidden
         />
@@ -161,7 +149,6 @@ function NavGroupSection({
               key={child.label}
               item={child}
               isActive={pathname === child.href}
-              nested
               onNavigate={onNavigate}
             />
           ))}
@@ -238,7 +225,7 @@ export function DashboardSidebar({ mobileOpen, onClose }: DashboardSidebarProps)
   return (
     <>
       {/* Desktop: floating rail */}
-      <aside className="fixed inset-y-4 left-4 z-30 hidden w-64 flex-col rounded-2xl border border-border/70 bg-card shadow-card lg:flex">
+      <aside className="fixed inset-y-4 left-4 z-30 hidden w-64 flex-col rounded-xl border border-border bg-card lg:flex">
         <SidebarBrand />
         <SidebarNav />
       </aside>
@@ -261,7 +248,7 @@ export function DashboardSidebar({ mobileOpen, onClose }: DashboardSidebarProps)
         aria-modal="true"
         aria-label="Sidebar"
       >
-        <div className="flex items-start justify-between px-6 pb-6 pt-7">
+        <div className="flex items-start justify-between px-5 pb-6 pt-6">
           <BrandLogo />
           <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close menu">
             <X className="h-4 w-4" />

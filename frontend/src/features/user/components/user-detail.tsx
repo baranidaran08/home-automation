@@ -113,7 +113,7 @@ export function UserDetail({ id }: { id: string }) {
 
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-3xl space-y-6">
+      <div className="mx-auto max-w-3xl space-y-8">
         <Skeleton className="h-9 w-48" />
         <Skeleton className="h-32 w-full rounded-2xl" />
         <Skeleton className="h-72 w-full rounded-2xl" />
@@ -131,9 +131,9 @@ export function UserDetail({ id }: { id: string }) {
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="mx-auto max-w-3xl space-y-8">
       <Rise index={0}>
-        <h1 className="text-3xl font-bold tracking-tight">User Details</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">User Details</h1>
         <p className="text-sm text-muted-foreground">
           View and manage this user&apos;s account information.
         </p>

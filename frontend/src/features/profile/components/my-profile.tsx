@@ -85,9 +85,9 @@ export function MyProfile() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="mx-auto max-w-3xl space-y-8">
       <Rise index={0}>
-        <h1 className="text-3xl font-bold tracking-tight">My Profile</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">My Profile</h1>
         <p className="text-sm text-muted-foreground">
           Manage your personal account information.
         </p>

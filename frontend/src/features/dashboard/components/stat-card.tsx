@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowUpRight, type LucideIcon } from 'lucide-react';
+import { type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -25,27 +25,18 @@ interface StatCardProps {
  */
 export function StatCard({ title, value, icon: Icon, isLoading = false, href }: StatCardProps) {
   const body = (
-    <CardContent className="flex items-center justify-between gap-4 p-5">
-      <div className="min-w-0 space-y-1">
+    <CardContent className="p-6">
+      <div className="flex items-center justify-between">
         <p className="truncate text-sm font-medium text-muted-foreground">{title}</p>
-        {isLoading ? (
-          <Skeleton className="h-9 w-20" />
-        ) : (
-          <p className="text-3xl font-bold tracking-tight tabular-nums">
-            <AnimatedNumber value={value} />
-          </p>
-        )}
+        <Icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
       </div>
-
-      <div
-        className={cn(
-          'flex h-12 w-12 shrink-0 items-center justify-center rounded-xl',
-          'bg-primary/10 text-primary transition-colors duration-200',
-          href && 'group-hover:bg-primary group-hover:text-primary-foreground'
-        )}
-      >
-        <Icon className="h-6 w-6" aria-hidden />
-      </div>
+      {isLoading ? (
+        <Skeleton className="mt-4 h-10 w-24" />
+      ) : (
+        <p className="mt-4 text-4xl font-semibold tracking-tight tabular-nums text-foreground">
+          <AnimatedNumber value={value} />
+        </p>
+      )}
     </CardContent>
   );
 
@@ -54,9 +45,8 @@ export function StatCard({ title, value, icon: Icon, isLoading = false, href }: 
   return (
     <Card
       className={cn(
-        'group relative overflow-hidden transition-all duration-200',
-        'hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-card',
-        'focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2'
+        'group relative transition-colors',
+        'hover:bg-accent/30 focus-within:ring-1 focus-within:ring-ring'
       )}
     >
       {/* The link covers the card so the entire surface is the hit target, while
@@ -65,11 +55,6 @@ export function StatCard({ title, value, icon: Icon, isLoading = false, href }: 
       <Link href={href} className="absolute inset-0 z-10">
         <span className="sr-only">{`View ${title}`}</span>
       </Link>
-
-      <ArrowUpRight
-        className="absolute right-4 top-4 h-4 w-4 text-muted-foreground opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-        aria-hidden
-      />
       {body}
     </Card>
   );

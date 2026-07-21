@@ -42,7 +42,8 @@
     --input: 228 26% 90%;
     --ring: 243 75% 59%;
 
-    --radius: 0.75rem;
+    /* Vercel-style restrained radius: ~8px lg / 6px md / 4px sm. */
+    --radius: 0.5rem;
   }
 
   /**
@@ -54,34 +55,40 @@
    *     dark canvas makes highly-saturated blue-violets optically vibrate and
    *     read "neon" rather than premium.
    */
+  /**
+   * Dark mode — Vercel design language. A neutral near-black system where
+   * separation comes from 1px borders and a slightly-raised card, NOT shadows or
+   * glows. Indigo is the single accent, used sparingly (primary actions, focus,
+   * links). Everything else is a calm grayscale so data reads first.
+   */
   .dark {
-    --background: 228 26% 6%; /* #0B0D13 */
-    --foreground: 228 30% 96%;
-    --card: 228 16% 17%; /* #242732 — a clear step above the canvas */
-    --card-foreground: 228 30% 96%;
-    --popover: 228 16% 17%;
-    --popover-foreground: 228 30% 96%;
+    --background: 0 0% 4%; /* #0a0a0a page canvas */
+    --foreground: 0 0% 93%; /* #ededed */
+    --card: 0 0% 7%; /* #121212 — one subtle step above the canvas */
+    --card-foreground: 0 0% 93%;
+    --popover: 0 0% 9%; /* #171717 — floats a touch higher */
+    --popover-foreground: 0 0% 93%;
 
-    --primary: 244 65% 72%; /* #8E88E8 — airy periwinkle; gentler at night */
-    --primary-foreground: 228 40% 10%;
+    --primary: 239 84% 67%; /* #6366f1 indigo — the one accent */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 228 14% 23%;
-    --secondary-foreground: 228 30% 96%;
-    --muted: 228 14% 23%;
-    --muted-foreground: 224 12% 68%;
-    --accent: 243 30% 24%;
-    --accent-foreground: 243 85% 88%;
+    --secondary: 0 0% 11%; /* #1c1c1c subtle fill */
+    --secondary-foreground: 0 0% 93%;
+    --muted: 0 0% 11%;
+    --muted-foreground: 0 0% 63%; /* #a1a1a1 */
+    --accent: 0 0% 13%; /* #212121 neutral hover fill */
+    --accent-foreground: 0 0% 96%;
 
-    --destructive: 0 65% 55%;
+    --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
-    --success: 142 60% 45%;
+    --success: 142 62% 45%;
     --success-foreground: 0 0% 100%;
-    --warning: 32 90% 52%;
-    --warning-foreground: 228 40% 10%;
+    --warning: 38 92% 55%;
+    --warning-foreground: 0 0% 10%;
 
-    --border: 228 12% 30%;
-    --input: 228 12% 32%;
-    --ring: 244 65% 72%;
+    --border: 0 0% 15%; /* #262626 — subtle separators */
+    --input: 0 0% 20%; /* #333333 — field edges read a touch stronger */
+    --ring: 239 84% 67%;
   }
 }
 
@@ -126,42 +133,14 @@
 }
 
 /* ==========================================================================
-   Dashboard canvas texture — a faint dot matrix plus a brand wash at the top.
+   Dashboard canvas — intentionally flat.
 
-   Purpose is depth, not decoration: white cards on a near-white canvas have
-   nothing to sit above, which is what makes them read flat. Giving the page a
-   texture lets the cards float without touching the cards themselves.
-
-   Deliberately STATIC. This sits behind data people read all day; ambient
-   motion belongs on the login, which is a five-second moment.
-
-   Both layers are token-driven, so they invert correctly in dark mode — the
-   dots are `--foreground` (near-black on light, near-white on dark) and the
-   wash is `--primary`.
+   Vercel's design language avoids decorative background effects; separation
+   comes from borders and surface steps, not texture. The class is kept (several
+   surfaces reference it) but renders nothing, so the canvas stays clean.
    ========================================================================== */
 .dashboard-canvas {
-  background-image:
-    radial-gradient(circle at 50% 0%, hsl(var(--primary) / 0.1), transparent 55%),
-    radial-gradient(hsl(var(--foreground) / 0.07) 1px, transparent 1px);
-  background-size:
-    100% 30rem,
-    22px 22px;
-  background-position:
-    50% 0,
-    0 0;
-  background-repeat: no-repeat, repeat;
-  /* Fade the texture down the viewport. Dots behind a dense table read as
-     noise, so the canvas is strongest up top and gone by the fold. */
-  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 45%, transparent 95%);
-  mask-image: linear-gradient(to bottom, black 0%, black 45%, transparent 95%);
-}
-
-/* Dark needs more alpha on both layers: the same values that read as a subtle
-   grey on #F8F9FC disappear entirely against #0B0D13. */
-.dark .dashboard-canvas {
-  background-image:
-    radial-gradient(circle at 50% 0%, hsl(var(--primary) / 0.14), transparent 55%),
-    radial-gradient(hsl(var(--foreground) / 0.1) 1px, transparent 1px);
+  background: transparent;
 }
 
 /* ==========================================================================
@@ -286,9 +265,8 @@
 
   /* Make browser autofill (Chrome/Edge/WebKit) match the app theme instead of
      the default grey/yellow. The inset box-shadow paints the field's own
-     background; text/caret use the theme foreground. `--secondary` matches the
-     form inputs' resting background (bg-secondary/50) — using `--background`
-     here painted them near-black, standing out against the grey fields. */
+     background; text/caret use the theme foreground. `--background` matches the
+     inputs' resting surface (bg-background) so autofilled fields blend in. */
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
@@ -299,8 +277,8 @@
   select:-webkit-autofill,
   select:-webkit-autofill:focus {
     -webkit-text-fill-color: hsl(var(--foreground));
-    -webkit-box-shadow: 0 0 0 1000px hsl(var(--secondary)) inset;
-    box-shadow: 0 0 0 1000px hsl(var(--secondary)) inset;
+    -webkit-box-shadow: 0 0 0 1000px hsl(var(--background)) inset;
+    box-shadow: 0 0 0 1000px hsl(var(--background)) inset;
     caret-color: hsl(var(--foreground));
     border-radius: inherit;
     transition: background-color 5000s ease-in-out 0s;

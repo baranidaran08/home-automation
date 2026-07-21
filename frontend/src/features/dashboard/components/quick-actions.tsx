@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { ChevronRight, FolderPlus, PackagePlus, FileUp, FilePlus2, type LucideIcon } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { usePermissions } from '@/hooks/use-permissions';
 import { MODULES, ACTIONS as PERMISSION_ACTIONS, type ModuleName } from '@/constants/permissions';
 import { ROUTES } from '@/constants/routes';
@@ -57,27 +57,30 @@ export function QuickActions() {
 
   return (
     <Card className="h-full">
-      <CardHeader>
-        <CardTitle className="text-base">Quick Actions</CardTitle>
+      <CardHeader className="pb-4">
+        <CardTitle className="text-base font-semibold">Quick Actions</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2">
+      {/* Vercel settings-panel style: a bordered list of rows, neutral icons,
+          generous vertical padding, subtle hover — no colored tiles. */}
+      <div className="border-t border-border">
         {actions.map(({ label, href, icon: Icon }) => (
           <Link
             key={label}
             href={href}
-            className="group flex items-center gap-3 rounded-xl border border-transparent bg-muted/50 px-3 py-3 transition-colors hover:border-primary/30 hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="group flex items-center gap-3 border-b border-border px-6 py-4 transition-colors last:border-b-0 hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring"
           >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-background text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-              <Icon className="h-4 w-4" aria-hidden />
-            </span>
-            <span className="flex-1 text-sm font-medium">{label}</span>
+            <Icon
+              className="h-4 w-4 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground"
+              aria-hidden
+            />
+            <span className="flex-1 text-sm font-medium text-foreground">{label}</span>
             <ChevronRight
               className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5"
               aria-hidden
             />
           </Link>
         ))}
-      </CardContent>
+      </div>
     </Card>
   );
 }

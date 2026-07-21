@@ -60,8 +60,8 @@ export function StatsCards() {
   ];
 
   return (
-    <div className="space-y-2">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="space-y-3">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map((card, i) => (
           <Rise key={card.title} index={i + 1}>
             <StatCard {...card} isLoading={isLoading} />

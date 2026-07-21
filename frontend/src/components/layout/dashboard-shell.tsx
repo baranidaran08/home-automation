@@ -30,14 +30,14 @@ export function DashboardShell({ children }: { children: ReactNode }) {
       {/* Offset for the floating desktop rail (w-64 + left-4 inset + gutter). */}
       <div className="lg:pl-[18.5rem]">
         <DashboardTopbar onMenuClick={() => setMobileOpen(true)} />
-        <main className="px-4 pb-10 pt-2 sm:px-6 lg:pr-8">
+        <main className="px-4 pb-14 pt-4 sm:px-8 lg:pr-10">
           {/* Global breadcrumb — rendered once here, above every page's title.
               Wrapped in the same max-w-7xl container the pages use, so it aligns
               flush with the page heading below it. The spacing lives on the
               breadcrumb itself, so when it hides (single-crumb pages like the
               dashboard root) it leaves no empty gap above the title. */}
           <div className="mx-auto max-w-7xl">
-            <Breadcrumb className="mb-4" />
+            <Breadcrumb className="mb-6" />
           </div>
           {children}
         </main>

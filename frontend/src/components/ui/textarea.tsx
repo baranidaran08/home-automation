@@ -9,7 +9,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, React.ComponentProps<'tex
           // Mirrors the Input styling exactly (fill, radius, hover/focus, invalid)
           // so single-line and multi-line fields look like one family. `min-h` +
           // padding stand in for Input's fixed `h-11`.
-          'flex min-h-[96px] w-full rounded-xl border border-input bg-secondary/50 px-3.5 py-2.5 text-sm transition-all placeholder:text-muted-foreground/70 hover:border-primary/30 focus-visible:border-primary focus-visible:bg-card focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/10 disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive aria-[invalid=true]:ring-destructive/10',
+          'flex min-h-[96px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive aria-[invalid=true]:focus-visible:ring-destructive',
           className
         )}
         ref={ref}

@@ -84,9 +84,9 @@ export function UserManagement() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6">
+    <div className="mx-auto max-w-7xl space-y-8">
       <Rise index={0}>
-        <h1 className="text-3xl font-bold tracking-tight">Users</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">Users</h1>
         <p className="text-sm text-muted-foreground">
           Manage accounts and assign each user a role that defines what they can do.
         </p>

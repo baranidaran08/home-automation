@@ -100,9 +100,9 @@ export function ProductManagement() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6">
+    <div className="mx-auto max-w-7xl space-y-8">
       <Rise index={0}>
-        <h1 className="text-3xl font-bold tracking-tight">Products</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">Products</h1>
         <p className="text-sm text-muted-foreground">
           Manage inventory. Each product belongs to one category.
         </p>
