@@ -13,6 +13,10 @@ export const metadata: Metadata = {
   },
   description:
     'Xen Automation — enterprise platform for managing smart home products, templates, and quotations.',
+  icons: {
+    icon: '/xen-logo.png',
+    apple: '/xen-logo.png',
+  },
 };
 
 export default function RootLayout({
